@@ -1,0 +1,17 @@
+bin
+/*.sdf
+/*.suo
+ipch
+/*.opensdf
+ThirdpartyLib
+OutNetworkSDK
+NetworkSDK
+OutNetworkClientSDK
+OutNetworkServerSDK
+NetworkServerSDK
+OutBusinessServerBin
+NetworkClientSDK
+OutBusinessServerTestBin
+OutBinOfSlnBuild
+/NetworkClient/*.filters
+/NetworkClient/*.user
