@@ -1,4 +1,4 @@
-// BusinessServer.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
+ï»¿// BusinessServer.cpp : å®šä¹‰æ§åˆ¶å°åº”ç”¨ç¨‹åºçš„å…¥å£ç‚¹ã€‚
 //
 
 #include "targetver.h"
@@ -11,7 +11,7 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	cout << "ÊäÈë·şÎñÆ÷ÀàĞÍ, Ä¬ÈÏÒì²½, sÍ¬²½" << endl;
+	cout << "è¾“å…¥æœåŠ¡å™¨ç±»å‹, é»˜è®¤å¼‚æ­¥, såŒæ­¥" << endl;
 	string server_type;
 	getline(std::cin, server_type);
 	if (server_type == "s")

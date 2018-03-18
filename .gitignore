@@ -15,3 +15,6 @@ OutBusinessServerTestBin
 OutBinOfSlnBuild
 /NetworkClient/*.filters
 /NetworkClient/*.user
+.vs
+OutNetworkClientBin
+OutNetworkServerBin
