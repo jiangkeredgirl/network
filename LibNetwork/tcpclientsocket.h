@@ -35,8 +35,8 @@ private:
 	void DoWrite();	
 	void ReadHeader();
 	void ReadBody();
-	int ReadErrorCheckHandler(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
-	int WriteErrorCheckHandler(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
+	int ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
+	int WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
 	//int Reconnect();
 	//int DoConnect();
 

@@ -34,15 +34,20 @@ public:
 	void StartRead();
 	void AsyncStartRead();
 	void Disconnect();
-	void ReadHandler(boost::system::error_code err_code, size_t bytes_readed);
-	void WriteHandler(boost::system::error_code err_code, size_t bytes_writed);
 	tcp::socket& socket()	{ return m_socket; }
 
 private:
+	void DoWrite();
+	void ReadHeader();
+	void ReadBody();
+	int ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
+	int WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
+
+private:
 	tcp::socket m_socket;
-	enum { MAXBUFFER = 1024 };
-	char m_readbuffer[MAXBUFFER];
-	char m_writebuffer[MAXBUFFER];
+	//enum { MAXBUFFER = 1024 };
+	//char m_readbuffer[MAXBUFFER];
+	//char m_writebuffer[MAXBUFFER];
 	shared_ptr<NetDataPackage> m_read_package;
 	list<shared_ptr<NetDataPackage>> m_write_packages;
 	f_connect          m_connect_callback;

@@ -115,7 +115,7 @@ int CTcpClientSocket::Write(const char* data, size_t size)
 		size_t writed_size = 0;
 		NetDataPackage write_package(data, size);
 		writed_size = boost::asio::write(m_socket, buffer(write_package.data(), size), ec);
-		error_code = WriteErrorCheckHandler(ec, writed_size, size);
+		error_code = WriteErrorCheck(ec, writed_size, size);
 	}
 	return error_code;
 }
@@ -151,7 +151,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 			boost::system::error_code ec;
 			m_read_package = shared_ptr<NetDataPackage>(new NetDataPackage());
 			size_t readed_size = boost::asio::read(m_socket, boost::asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE), ec);
-			int error_code = ReadErrorCheckHandler(ec, readed_size, NetDataPackage::HEADER_SIZE);
+			int error_code = ReadErrorCheck(ec, readed_size, NetDataPackage::HEADER_SIZE);
 			if (error_code)
 			{
 				if (m_read_callback)
@@ -171,7 +171,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 			}
 
 			readed_size = boost::asio::read(m_socket, boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size), ec);
-			error_code = ReadErrorCheckHandler(ec, readed_size, m_read_package->header()->body_size);
+			error_code = ReadErrorCheck(ec, readed_size, m_read_package->header()->body_size);
 			if (error_code)
 			{
 				if (m_read_callback)
@@ -214,7 +214,7 @@ void CTcpClientSocket::DoWrite()
 			m_write_packages.front()->data_size()),
 			[this](boost::system::error_code ec, std::size_t length)
 		{
-			int error_code = WriteErrorCheckHandler(ec, length, m_write_packages.front()->data_size());
+			int error_code = WriteErrorCheck(ec, length, m_write_packages.front()->data_size());
 			if (error_code)
 			{
 				if (m_write_callback)
@@ -246,7 +246,7 @@ void CTcpClientSocket::ReadHeader()
 		boost::asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE),
 		[this](boost::system::error_code ec, std::size_t length)
 	{
-		int error_code = ReadErrorCheckHandler(ec, length, NetDataPackage::HEADER_SIZE);
+		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
 		if (error_code)
 		{
 			if (m_read_callback)
@@ -275,7 +275,7 @@ void CTcpClientSocket::ReadBody()
 		boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
 		[this](boost::system::error_code ec, std::size_t length)
 	{
-		int error_code = ReadErrorCheckHandler(ec, length, NetDataPackage::HEADER_SIZE);
+		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
 		if (error_code)
 		{
 			if (m_read_callback)
@@ -296,7 +296,7 @@ void CTcpClientSocket::ReadBody()
 	});
 }
 
-int CTcpClientSocket::ReadErrorCheckHandler(boost::system::error_code ec, size_t readed_size, size_t require_read_size)
+int CTcpClientSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size)
 {
 	int error_code = 1;
 	do
@@ -323,7 +323,7 @@ int CTcpClientSocket::ReadErrorCheckHandler(boost::system::error_code ec, size_t
 	return error_code;
 }
 
-int CTcpClientSocket::WriteErrorCheckHandler(boost::system::error_code ec, size_t writed_size, size_t require_write_size)
+int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size)
 {
 	int error_code = 1;
 	do
