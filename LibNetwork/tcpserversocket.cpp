@@ -1,16 +1,16 @@
-#include "tcpserverconnect.h"
+#include "tcpserversocket.h"
 
-CTcpConnect::CTcpConnect(io_service& service) :m_socket(service)
+CTcpServerSocket::CTcpServerSocket(io_service& service) :m_socket(service)
 {
 
 }
 
 
-CTcpConnect::~CTcpConnect()
+CTcpServerSocket::~CTcpServerSocket()
 {
 }
 
-int CTcpConnect::RegisterHandler(f_connect connect_callback, f_disconnect disconnect_callback, f_read read_callback, f_write write_callback)
+int CTcpServerSocket::RegisterHandler(f_connect connect_callback, f_disconnect disconnect_callback, f_read read_callback, f_write write_callback)
 {
 	m_connect_callback = connect_callback;
 	m_disconnect_callback = disconnect_callback;
@@ -19,7 +19,7 @@ int CTcpConnect::RegisterHandler(f_connect connect_callback, f_disconnect discon
 	return 0;
 }
 
-int CTcpConnect::Write(const char* data, size_t size)
+int CTcpServerSocket::Write(const char* data, size_t size)
 {
 	boost::system::error_code ec;
 	size_t write_size = 0;
@@ -30,25 +30,25 @@ int CTcpConnect::Write(const char* data, size_t size)
 	return ec.value();
 }
 
-int CTcpConnect::AsyncWrite(const char* data, size_t size)
+int CTcpServerSocket::AsyncWrite(const char* data, size_t size)
 {
 	memset(m_writebuffer, 0, sizeof(m_writebuffer));
 	memcpy(m_writebuffer, data, size);
-	m_socket.async_write_some(buffer(m_writebuffer, MAXBUFFER), std::bind(&CTcpConnect::WriteHandler, this, std::placeholders::_1, std::placeholders::_2));
+	m_socket.async_write_some(buffer(m_writebuffer, MAXBUFFER), std::bind(&CTcpServerSocket::WriteHandler, this, std::placeholders::_1, std::placeholders::_2));
 	return 0;
 }
 
-string CTcpConnect::RemoteIP()
+string CTcpServerSocket::RemoteIP()
 {
 	return m_socket.remote_endpoint().address().to_string();
 }
 
-int CTcpConnect::RemotePort()
+int CTcpServerSocket::RemotePort()
 {
 	return m_socket.remote_endpoint().port();
 }
 
-void CTcpConnect::StartRead()
+void CTcpServerSocket::StartRead()
 {
 	cout << "tcp server accept a connet, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
 	cout << "tcp server start read data and add current connect to connects list" << endl;
@@ -72,7 +72,7 @@ void CTcpConnect::StartRead()
 	}
 }
 
-void CTcpConnect::AsyncStartRead()
+void CTcpServerSocket::AsyncStartRead()
 {
 	cout << "tcp server accept a connet, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
 	cout << "tcp server start read data and add current connect to connects list" << endl;
@@ -80,10 +80,10 @@ void CTcpConnect::AsyncStartRead()
 	{
 		m_connect_callback(shared_from_this(), 0);
 	}
-	m_socket.async_read_some(buffer(m_readbuffer, MAXBUFFER), std::bind(&CTcpConnect::ReadHandler, this, std::placeholders::_1, std::placeholders::_2));
+	m_socket.async_read_some(buffer(m_readbuffer, MAXBUFFER), std::bind(&CTcpServerSocket::ReadHandler, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void CTcpConnect::Disconnect()
+void CTcpServerSocket::Disconnect()
 {
 	cout << "tcp server socket closed and delete current connect from connects list" << endl;
 	boost::system::error_code ec;
@@ -93,20 +93,20 @@ void CTcpConnect::Disconnect()
 		m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
 	}
-	//shared_ptr<CTcpConnect> connect = shared_from_this();
+	//shared_ptr<CTcpServerSocket> connect = shared_from_this();
 	//if (m_disconnect_callback)
 	//{
 	//	m_disconnect_callback(connect, 0);
 	//}
 }
 
-void CTcpConnect::ReadHandler(boost::system::error_code ec, size_t bytes_readed)
+void CTcpServerSocket::ReadHandler(boost::system::error_code ec, size_t bytes_readed)
 {
 	cout  << "tcp serever read, error code :" << ec.value() << ", error message:"  <<ec.message() << endl;
 	if (ec)	
 	{
 		//Disconnect();
-		shared_ptr<CTcpConnect> connect = shared_from_this();
+		shared_ptr<CTcpServerSocket> connect = shared_from_this();
 		if (m_disconnect_callback)
 		{
 			m_disconnect_callback(connect, 0);
@@ -119,17 +119,17 @@ void CTcpConnect::ReadHandler(boost::system::error_code ec, size_t bytes_readed)
 			m_read_callback(shared_from_this(), m_readbuffer, bytes_readed, 0);
 		}
 		memset(m_readbuffer, 0, sizeof(m_readbuffer));
-		m_socket.async_read_some(buffer(m_readbuffer, MAXBUFFER), std::bind(&CTcpConnect::ReadHandler, this, std::placeholders::_1, std::placeholders::_2));
+		m_socket.async_read_some(buffer(m_readbuffer, MAXBUFFER), std::bind(&CTcpServerSocket::ReadHandler, this, std::placeholders::_1, std::placeholders::_2));
 	}	
 }
 
-void CTcpConnect::WriteHandler(boost::system::error_code ec, size_t bytes_writed)
+void CTcpServerSocket::WriteHandler(boost::system::error_code ec, size_t bytes_writed)
 {
 	cout  << "tcp serever write, error code :" << ec.value() << ", error message:"  <<ec.message() << endl;
 	if (ec)	
 	{
 		//Disconnect();
-		shared_ptr<CTcpConnect> connect = shared_from_this();
+		shared_ptr<CTcpServerSocket> connect = shared_from_this();
 		if (m_disconnect_callback)
 		{
 			m_disconnect_callback(connect, 0);

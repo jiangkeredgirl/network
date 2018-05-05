@@ -3,12 +3,12 @@
 #include "kutility.h"
 #include <boost/asio.hpp>
 //#include <boost/bind.hpp>
-#include "tcpserverconnect.h"
+#include "tcpserversocket.h"
 
 using namespace boost::asio;
 using ip::tcp;
 
-class CTcpConnect;
+class CTcpServerSocket;
 
 class CTcpAccept
 {
@@ -21,22 +21,22 @@ public:
 	int Start();
 	int AsyncStart();
 	int Stop();
-	list<shared_ptr<CTcpConnect>>& GetConnects();
+	list<shared_ptr<CTcpServerSocket>>& GetConnects();
 
 private:
 	int TcpAccepterRunThread(bool async);
 	int StartAccept();
 	int AsyncStartAccept();
-	void AcceptHandler(shared_ptr<CTcpConnect> connect, boost::system::error_code error_code);
+	void AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::system::error_code error_code);
 	void DisplayIP();
-	shared_ptr<CTcpConnect> NewConnect();
-	int DeleteConnect(shared_ptr<CTcpConnect> connect);
+	shared_ptr<CTcpServerSocket> NewConnect();
+	int DeleteConnect(shared_ptr<CTcpServerSocket> connect);
 
 private:
-	int OnTcpRead(shared_ptr<CTcpConnect> connect, const char* data, size_t size, int status);
-	int OnTcpWrite(shared_ptr<CTcpConnect> connect, const char* data, size_t size, int status);
-	int OnTcpConnect(shared_ptr<CTcpConnect> connect, int status);
-	int OnTcpDisconnect(shared_ptr<CTcpConnect> connect, int status);
+	int OnTcpRead(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
+	int OnTcpWrite(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
+	int OnTcpConnect(shared_ptr<CTcpServerSocket> connect, int status);
+	int OnTcpDisconnect(shared_ptr<CTcpServerSocket> connect, int status);
 	
 private:
 	std::thread        m_thread_server;
@@ -46,7 +46,7 @@ private:
 private:
 	io_service        m_ioservice;
 	shared_ptr<ip::tcp::acceptor> m_acceptor;
-	list<shared_ptr<CTcpConnect>> m_connect_list;
+	list<shared_ptr<CTcpServerSocket>> m_connect_list;
 	mutex              m_mutex_connect_list;
 	ITcpServerHandler* m_tcpserver_handler;
 };

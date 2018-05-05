@@ -3,24 +3,25 @@
 #include "kutility.h"
 #include "tcpserverhandler.h"
 #include <boost/asio.hpp>
+#include "NetDataPackage.h"
 //#include <boost/bind.hpp>
 //#include <boost/enable_shared_from_this.hpp>
 //#include <boost/shared_ptr.hpp>
 
 using namespace boost::asio;
 using ip::tcp;
-class CTcpConnect;
+class CTcpServerSocket;
 
-typedef function<int (shared_ptr<CTcpConnect> connect, int status)> f_connect;
-typedef function<int (shared_ptr<CTcpConnect> connect, int status)> f_disconnect;
-typedef function<int(shared_ptr<CTcpConnect> connect, const char* data, size_t size, int status)> f_read;
-typedef function<int(shared_ptr<CTcpConnect> connect, const char* data, size_t size, int status)> f_write;
+typedef function<int (shared_ptr<CTcpServerSocket> connect, int status)> f_connect;
+typedef function<int (shared_ptr<CTcpServerSocket> connect, int status)> f_disconnect;
+typedef function<int(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)> f_read;
+typedef function<int(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)> f_write;
 
-class CTcpConnect : public std::enable_shared_from_this<CTcpConnect>, public ITcpConnect
+class CTcpServerSocket : public std::enable_shared_from_this<CTcpServerSocket>, public ITcpConnect
 {
 public:
-	CTcpConnect(io_service& service);
-	virtual ~CTcpConnect();
+	CTcpServerSocket(io_service& service);
+	virtual ~CTcpServerSocket();
 
 public:	
 	virtual int Write(const char* data, size_t size) override;
@@ -42,6 +43,8 @@ private:
 	enum { MAXBUFFER = 1024 };
 	char m_readbuffer[MAXBUFFER];
 	char m_writebuffer[MAXBUFFER];
+	shared_ptr<NetDataPackage> m_read_package;
+	list<shared_ptr<NetDataPackage>> m_write_packages;
 	f_connect          m_connect_callback;
 	f_disconnect       m_disconnect_callback;
 	f_read             m_read_callback;

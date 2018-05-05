@@ -184,9 +184,9 @@
     <ClInclude Include="tcpclientsocket.h" />
     <ClInclude Include="tcpserver.h" />
     <ClInclude Include="tcpserveraccept.h" />
-    <ClInclude Include="tcpserverconnect.h" />
     <ClInclude Include="tcpserverhandler.h" />
     <ClInclude Include="tcpserverimpl.h" />
+    <ClInclude Include="tcpserversocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -207,8 +207,8 @@
     <ClCompile Include="tcpclientimpl.cpp" />
     <ClCompile Include="tcpclientsocket.cpp" />
     <ClCompile Include="tcpserveraccept.cpp" />
-    <ClCompile Include="tcpserverconnect.cpp" />
     <ClCompile Include="tcpserverimpl.cpp" />
+    <ClCompile Include="tcpserversocket.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

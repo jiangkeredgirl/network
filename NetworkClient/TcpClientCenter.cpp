@@ -1,4 +1,4 @@
-#include "TcpClientCenter.h"
+ï»¿#include "TcpClientCenter.h"
 #include "TcpClientHandlerCenter.h"
 #include "LibNetworkClient.h"
 #include "BusinessClientCenter.h"
@@ -27,13 +27,13 @@ int TcpClientCenter::Run(bool async)
 	string client_type;
 	do
 	{
-		cout << "ÊäÈë·þÎñÆ÷ipµØÖ·, ÀýÈç:127.0.0.1" << endl;
+		cout << "ÃŠÃ¤ÃˆÃ«Â·Ã¾ÃŽÃ±Ã†Ã·ipÂµÃ˜Ã–Â·, Ã€Ã½ÃˆÃ§:127.0.0.1" << endl;
 		string ip;
 		getline(std::cin, ip);
-		cout << "ÊäÈë·þÎñÆ÷¶Ë¿Ú, ÀýÈç:9000" << endl;
+		cout << "ÃŠÃ¤ÃˆÃ«Â·Ã¾ÃŽÃ±Ã†Ã·Â¶Ã‹Â¿Ãš, Ã€Ã½ÃˆÃ§:9000" << endl;
 		string strport;
 		getline(std::cin, strport);
-		cout << "ÊäÈë¿Í»§¶ËÀàÐÍ, Ä¬ÈÏtcp¿Í»§¶Ë, bÒµÎñ¿Í»§¶Ë, d Éè±¸Ô´¿Í»§¶Ë" << endl;		
+		cout << "ÃŠÃ¤ÃˆÃ«Â¿ÃÂ»Â§Â¶Ã‹Ã€Ã ÃÃ, Ã„Â¬ÃˆÃtcpÂ¿ÃÂ»Â§Â¶Ã‹, bÃ’ÂµÃŽÃ±Â¿ÃÂ»Â§Â¶Ã‹, d Ã‰Ã¨Â±Â¸Ã”Â´Â¿ÃÂ»Â§Â¶Ã‹" << endl;		
 		getline(std::cin, client_type);
 
 		if (ip.empty())
@@ -63,11 +63,11 @@ int TcpClientCenter::Run(bool async)
 			error_code = GetNetworkClient()->AsyncTcpConnect(ip, port);
 			if (error_code == 0)
 			{
-				cout << "tcpÒì²½¿Í»§¶ËÒÑÁ´½Ó, ·þÎñÆ÷ip:" << ip << ", ¶Ë¿Ú:" << port << endl;
+				cout << "tcpÃ’Ã¬Â²Â½Â¿ÃÂ»Â§Â¶Ã‹Ã’Ã‘ÃÂ´Â½Ã“, Â·Ã¾ÃŽÃ±Ã†Ã·ip:" << ip << ", Â¶Ã‹Â¿Ãš:" << port << endl;
 			}
 			else
 			{
-				cout << "tcpÒì²½¿Í»§¶ËÁ´½ÓÊ§°Ü, ·þÎñÆ÷ip:" << ip << ", ¶Ë¿Ú:" << port << endl;
+				cout << "tcpÃ’Ã¬Â²Â½Â¿ÃÂ»Â§Â¶Ã‹ÃÂ´Â½Ã“ÃŠÂ§Â°Ãœ, Â·Ã¾ÃŽÃ±Ã†Ã·ip:" << ip << ", Â¶Ã‹Â¿Ãš:" << port << endl;
 			}
 		}
 		else
@@ -75,11 +75,11 @@ int TcpClientCenter::Run(bool async)
 			error_code = GetNetworkClient()->TcpConnect(ip, port);
 			if (error_code == 0)
 			{
-				cout << "tcpÍ¬²½¿Í»§¶ËÒÑÁ´½Ó, ·þÎñÆ÷ip:" << ip << ", ¶Ë¿Ú:" << port << endl;
+				cout << "tcpÃÂ¬Â²Â½Â¿ÃÂ»Â§Â¶Ã‹Ã’Ã‘ÃÂ´Â½Ã“, Â·Ã¾ÃŽÃ±Ã†Ã·ip:" << ip << ", Â¶Ã‹Â¿Ãš:" << port << endl;
 			}
 			else
 			{
-				cout << "tcpÍ¬²½¿Í»§¶ËÁ´½ÓÊ§°Ü, ·þÎñÆ÷ip:" << ip << ", ¶Ë¿Ú:" << port << endl;
+				cout << "tcpÃÂ¬Â²Â½Â¿ÃÂ»Â§Â¶Ã‹ÃÂ´Â½Ã“ÃŠÂ§Â°Ãœ, Â·Ã¾ÃŽÃ±Ã†Ã·ip:" << ip << ", Â¶Ã‹Â¿Ãš:" << port << endl;
 			}
 		}
 	} while (error_code != 0);
@@ -94,7 +94,7 @@ int TcpClientCenter::Run(bool async)
 		{
 
 		}
-		cout << "ÊäÈë×Ö·û´®·¢ËÍµ½¿Í»§¶Ë, c¹Ø±ÕÁ¬½Ó\n" << endl;
+		cout << "ÃŠÃ¤ÃˆÃ«Ã—Ã–Â·Ã»Â´Â®Â·Â¢Ã‹ÃÂµÂ½Â¿ÃÂ»Â§Â¶Ã‹, cÂ¹Ã˜Â±Ã•ÃÂ¬Â½Ã“\n" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
 		{
@@ -113,7 +113,7 @@ int TcpClientCenter::Run(bool async)
 		}
 	} while (true);
 	GetNetworkClient()->TcpDisconnect();
-	cout << "tcp¿Í»§¶ËÒÑ¶Ï¿ª" << endl;
+	cout << "tcpÂ¿ÃÂ»Â§Â¶Ã‹Ã’Ã‘Â¶ÃÂ¿Âª" << endl;
 	system("pause");
 	return 0;
 }
