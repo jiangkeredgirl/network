@@ -1,9 +1,9 @@
 @call "%VS141COMNTOOLS%VsDevCmd.bat"
 cd /d %~dp0
-MSBuild network.sln /m /target:Rebuild /p:VisualStudioVersion=14.1 /p:Configuration=Debug   /property:Platform=x86
-MSBuild network.sln /m /target:Rebuild /p:VisualStudioVersion=14.1 /p:Configuration=Release /property:Platform=x86
-MSBuild network.sln /m /target:Rebuild /p:VisualStudioVersion=14.1 /p:Configuration=Debug   /property:Platform=x64 
-MSBuild network.sln /m /target:Rebuild /p:VisualStudioVersion=14.1 /p:Configuration=Release /property:Platform=x64
-echo f|xcopy /y /s /i /f .\NetworkServer\OutNetworkServerBin\*               .\OutBinOfSlnBuild\
-echo f|xcopy /y /s /i /f .\NetworkClient\OutNetworkClientBin\*               .\OutBinOfSlnBuild\
+MSBuild network.sln /t:rebuild /p:platform=win32 /p:configuration=debug   /p:PlatformToolset=v141
+MSBuild network.sln /t:rebuild /p:platform=win32 /p:Configuration=release /p:PlatformToolset=v141
+MSBuild network.sln /t:rebuild /p:platform=x64   /p:configuration=debug   /p:PlatformToolset=v141
+MSBuild network.sln /t:rebuild /p:platform=x64   /p:Configuration=release /p:PlatformToolset=v141
+echo f|xcopy /y /s /i /f .\NetworkServer\OutNetworkServerBin\*               .\OutBinOfSln\
+echo f|xcopy /y /s /i /f .\NetworkClient\OutNetworkClientBin\*               .\OutBinOfSln\
 pause
