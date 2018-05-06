@@ -6,4 +6,5 @@ MSBuild network.sln /t:rebuild /p:platform=x64   /p:configuration=debug   /p:Pla
 MSBuild network.sln /t:rebuild /p:platform=x64   /p:Configuration=release /p:PlatformToolset=v141
 echo f|xcopy /y /s /i /f .\NetworkServer\OutNetworkServerBin\*               .\OutBinOfSln\
 echo f|xcopy /y /s /i /f .\NetworkClient\OutNetworkClientBin\*               .\OutBinOfSln\
+echo f|xcopy /y /s /i /f .\KlogSDK\bin\*                                     .\OutBinOfSln\
 pause

@@ -18,3 +18,12 @@ OutBinOfSlnBuild
 .vs
 OutNetworkClientBin
 OutNetworkServerBin
+OutBinOfSln
+/LibNetwork/*.user
+/LibNetwork/*.filters
+/LibNetworkClient/*.user
+/LibNetworkClient/*.filters
+/LibNetworkServer/*.user
+/LibNetworkServer/*.filters
+/NetworkServer/*.filters
+/NetworkServer/*.user
