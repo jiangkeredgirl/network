@@ -3,9 +3,23 @@
 //#include "traceprinter.h"
 //#include "traceloader.h"
 #define KLOG_USE_DYNAMIC_DLL    1
-#if KLOG_USE_DYNAMIC_DLL	
+
+#if KLOG_USE_DYNAMIC_DLL
+#ifdef _WIN64
+#ifdef _DEBUG
+#define KLOG_DLL_NAME  "kloglib_x64_v141_Debug.dll"
+#else
 #define KLOG_DLL_NAME  "kloglib_x64_v141_Release.dll"
 #endif
+#else
+#ifdef _DEBUG
+#define KLOG_DLL_NAME  "kloglib_x32_v141_Debug.dll"
+#else
+#define KLOG_DLL_NAME  "kloglib_x32_v141_Release.dll"
+#endif
+#endif
+#endif
+
 #include "tracepackage.h"
 
 // 是否生成trace 函数
@@ -25,7 +39,7 @@
 #define  TRACE_TEMP            8                     ///< temporary out,0 not output
 
 // log 标签
-#define  TRACE_LABEL          ("kk")                 ///< my output label
+#define  TRACE_LABEL          ("Log'sOwner")           ///< my output label
 
 // 定义一些常用的trace宏
 // c风格char类型 编译期可以去掉trace代码
