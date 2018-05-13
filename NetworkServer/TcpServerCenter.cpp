@@ -1,4 +1,4 @@
-#include "TcpServerCenter.h"
+ï»¿#include "TcpServerCenter.h"
 #include "LibNetworkServer.h"
 #include "TcpServerHandlerCenter.h"
 #include "BusinessServerHandlerCenter.h"
@@ -21,7 +21,7 @@ TcpServerCenter& TcpServerCenter::instance()
 
 int TcpServerCenter::Run(bool async)
 {
-	cout << "ÊäÈë·þÎñÆ÷¶Ë¿Ú, ÀýÈç:9000" << endl;
+	cout << "è¾“å…¥æœåŠ¡å™¨ç«¯å£, ä¾‹å¦‚:9000" << endl;
 	string strport;
 	getline(std::cin, strport);
 	int port = 9000;
@@ -29,7 +29,7 @@ int TcpServerCenter::Run(bool async)
 	{
 		port = stoi(strport);
 	}
-	cout << "ÊäÈë·þÎñÆ÷ÒµÎñÀàÐÍ, Ä¬ÈÏtcp·þÎñÆ÷, b ÒµÎñ·þÎñÆ÷, d Éè±¸Ô´·þÎñÆ÷" << endl;
+	cout << "è¾“å…¥æœåŠ¡å™¨ä¸šåŠ¡ç±»åž‹, é»˜è®¤tcpæœåŠ¡å™¨, b ä¸šåŠ¡æœåŠ¡å™¨, d è®¾å¤‡æºæœåŠ¡å™¨" << endl;
 	string str_server_type;
 	getline(std::cin, str_server_type);
 
@@ -45,12 +45,12 @@ int TcpServerCenter::Run(bool async)
 	if (async)
 	{
 		tcpserver->AsyncStart();
-		cout << "tcpÒì²½·þÎñÆ÷ÒÑÆô¶¯, ¶Ë¿Ú:" << port << endl;
+		cout << "tcpå¼‚æ­¥æœåŠ¡å™¨å·²å¯åŠ¨, ç«¯å£:" << port << endl;
 	}
 	else
 	{
 		tcpserver->Start();
-		cout << "tcpÍ¬²½·þÎñÆ÷ÒÑÆô¶¯, ¶Ë¿Ú:" << port << endl;
+		cout << "tcpåŒæ­¥æœåŠ¡å™¨å·²å¯åŠ¨, ç«¯å£:" << port << endl;
 	}
 	string input_flag;
 	do
@@ -63,7 +63,7 @@ int TcpServerCenter::Run(bool async)
 		{
 
 		}
-		cout << "ÊäÈë×Ö·û´®½«·¢ËÍµ½¿Í»§¶Ë, c¹Ø±Õ·þÎñÆ÷" << endl;
+		cout << "è¾“å…¥å­—ç¬¦ä¸²å°†å‘é€åˆ°å®¢æˆ·ç«¯, cå…³é—­æœåŠ¡å™¨" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
 		{
@@ -79,7 +79,7 @@ int TcpServerCenter::Run(bool async)
 		}
 	} while (true);
 	tcpserver->Stop();
-	cout << "tcp·þÎñÆ÷ÒÑ¹Ø±Õ" << endl;
+	cout << "tcpæœåŠ¡å™¨å·²å…³é—­" << endl;
 	system("pause");
 	return 0;
 }

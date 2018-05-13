@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "cstandard.h"
 #include "tcpserverhandler.h"
 

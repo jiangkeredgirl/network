@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #ifdef LIBNETWORK_EXPORTS
 #define LIBNETWORK_API __declspec(dllexport)
 #else

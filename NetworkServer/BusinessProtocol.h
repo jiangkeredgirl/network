@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 #include <windows.h>
 #include "cstandard.h"
 using namespace std;
 //#pragma warning(disable : C4309)
 
-#pragma pack(push)  /**< ±£´æ¶ÔÆë×´Ì¬. */
-#pragma pack(1)     /**< Éè¶¨Îª1×Ö½Ú¶ÔÆë. */
+#pragma pack(push)  /**< ä¿å­˜å¯¹é½çŠ¶æ€. */
+#pragma pack(1)     /**< è®¾å®šä¸º1å­—èŠ‚å¯¹é½. */
 
 enum BusinessType
 {
@@ -28,49 +28,49 @@ struct BusinessPackage
 struct CameraConfig : public BusinessPackage
 {
 	__int64 id;         /**< ID. */
-	char ip[16];     /**< IPµØÖ·. */
+	char ip[16];     /**< IPåœ°å€. */
 	int port;         /**< port. */
-	char username[20]; /**< ÓÃ»§Ãû . */
-	char password[20];  /**< ÃÜÂë. */
-	int cycle;		/*²É¼¯ÖÜÆÚ*/
-	__int64 initialFlow; /*³õÊ¼Á÷Á¿*/
-	int algFuncType;    /**< Ëã·¨¹¦ÄÜ. 103001£º¼ìÈË103002£º¼ì³µ	103003£ºÈ«¾°103004£ºÍ£³µÎ»*/
-	int autoUpload;    /**< Ö÷¶¯ÉÏ´«±êÖ¾. 0x01:Ö÷¶¯ÉÏ´«£¬0x02²»Ö÷¶¯ÉÏ´«*/
+	char username[20]; /**< ç”¨æˆ·å . */
+	char password[20];  /**< å¯†ç . */
+	int cycle;		/*é‡‡é›†å‘¨æœŸ*/
+	__int64 initialFlow; /*åˆå§‹æµé‡*/
+	int algFuncType;    /**< ç®—æ³•åŠŸèƒ½. 103001ï¼šæ£€äºº103002ï¼šæ£€è½¦	103003ï¼šå…¨æ™¯103004ï¼šåœè½¦ä½*/
+	int autoUpload;    /**< ä¸»åŠ¨ä¸Šä¼ æ ‡å¿—. 0x01:ä¸»åŠ¨ä¸Šä¼ ï¼Œ0x02ä¸ä¸»åŠ¨ä¸Šä¼ */
 	CameraConfig()
 	{
 		business_type = static_cast<char>(BusinessType::CAMERA_CONFIG_TYPE);
 	}
-};//Á´½ÓÉãÏñÍ·
+};//é“¾æ¥æ‘„åƒå¤´
 
 struct PedFlowInfo : public BusinessPackage
 {
-	__int64 devID;  /**< Éè±¸ID.*/
-	__int64 num;    /**< ĞĞÈËÊıÁ¿(´Ó¿ªÊ¼µ½µ±Ç°²É¼¯Ê±¼ä).*/
-	__int64 time;   /**< ²É¼¯Ê±¼ä£¨Ê±¼ä´Á£©.*/
+	__int64 devID;  /**< è®¾å¤‡ID.*/
+	__int64 num;    /**< è¡Œäººæ•°é‡(ä»å¼€å§‹åˆ°å½“å‰é‡‡é›†æ—¶é—´).*/
+	__int64 time;   /**< é‡‡é›†æ—¶é—´ï¼ˆæ—¶é—´æˆ³ï¼‰.*/
 	PedFlowInfo()
 	{
 		business_type = static_cast<char>(BusinessType::PED_FLOW_INFO_TYPE);
 	}
-} ;//ÈËÁ÷Á¿ĞÅÏ¢
+} ;//äººæµé‡ä¿¡æ¯
 
 struct VehFlowInfo : public BusinessPackage
 {
-	__int64 devID;  /**< Éè±¸ID.*/
-	__int64 num;    /**< ³µÁ¾ÊıÁ¿(´Ó¿ªÊ¼µ½µ±Ç°²É¼¯Ê±¼ä).*/
-	__int64 time;   /**< ²É¼¯Ê±¼ä£¨Ê±¼ä´Á£©.*/
+	__int64 devID;  /**< è®¾å¤‡ID.*/
+	__int64 num;    /**< è½¦è¾†æ•°é‡(ä»å¼€å§‹åˆ°å½“å‰é‡‡é›†æ—¶é—´).*/
+	__int64 time;   /**< é‡‡é›†æ—¶é—´ï¼ˆæ—¶é—´æˆ³ï¼‰.*/
 	VehFlowInfo()
 	{
 		business_type = static_cast<char>(BusinessType::VEH_FLOW_INFO_TYPE);
 	}
-};//³µÁ÷Á¿ĞÅÏ¢
+};//è½¦æµé‡ä¿¡æ¯
 
 struct GetVideo : public BusinessPackage
 {
-	__int64 camid; /**< Éè±¸ID. */
-	char ip[16]; /**< Ä¿±êIP. */
-	int port; /**< Ä¿±ê¶Ë¿Ú. */
-	char osdFlag;/*ÊÇ·ñÌí¼ÓOSD±êÖ¾*/
-	char type;  /*!< ÊÓÆµÊı¾İÀàĞÍ. */
+	__int64 camid; /**< è®¾å¤‡ID. */
+	char ip[16]; /**< ç›®æ ‡IP. */
+	int port; /**< ç›®æ ‡ç«¯å£. */
+	char osdFlag;/*æ˜¯å¦æ·»åŠ OSDæ ‡å¿—*/
+	char type;  /*!< è§†é¢‘æ•°æ®ç±»å‹. */
 	GetVideo()
 	{
 		business_type = static_cast<char>(BusinessType::GET_VIDEO_TYPE);
@@ -79,11 +79,11 @@ struct GetVideo : public BusinessPackage
 
 struct StopVideo : public BusinessPackage
 {
-	__int64 camid; /**< Éè±¸ID. */
-	char ip[16]; /**< Ä¿±êIP. */
-	int port; /**< Ä¿±ê¶Ë¿Ú. */
-	char osdFlag;/*ÊÇ·ñÌí¼ÓOSD±êÖ¾*/
-	char type;  /*!< ÊÓÆµÊı¾İÀàĞÍ. */
+	__int64 camid; /**< è®¾å¤‡ID. */
+	char ip[16]; /**< ç›®æ ‡IP. */
+	int port; /**< ç›®æ ‡ç«¯å£. */
+	char osdFlag;/*æ˜¯å¦æ·»åŠ OSDæ ‡å¿—*/
+	char type;  /*!< è§†é¢‘æ•°æ®ç±»å‹. */
 	StopVideo()
 	{
 		business_type = static_cast<char>(BusinessType::STOP_VIDEO_TYPE);
@@ -92,8 +92,8 @@ struct StopVideo : public BusinessPackage
 
 struct CamInfo : public BusinessPackage
 {
-	//char ip[16];//Éè±¸IP
-	__int64 id;	//Éè±¸id
+	//char ip[16];//è®¾å¤‡IP
+	__int64 id;	//è®¾å¤‡id
 	CamInfo()
 	{
 		business_type = static_cast<char>(BusinessType::CAMERA_INFO_TYPE);
@@ -103,14 +103,14 @@ struct CamInfo : public BusinessPackage
 struct CamState : public BusinessPackage
 {
 	__int64 id;         /**< ID. */
-	char ip[16];     /**< IPµØÖ·. */
+	char ip[16];     /**< IPåœ°å€. */
 	int port;         /**< port. */
-	char username[20]; /**< ÓÃ»§Ãû . */
-	char password[20];  /**< ÃÜÂë. */
-	int cycle;		/*²É¼¯ÖÜÆÚ*/
-	__int64 initialFlow; /*³õÊ¼Á÷Á¿*/
-	int algFuncType;    /**< Ëã·¨¹¦ÄÜ. */
-	int camstate;    /**< Ö÷¶¯ÉÏ´«±êÖ¾. */
+	char username[20]; /**< ç”¨æˆ·å . */
+	char password[20];  /**< å¯†ç . */
+	int cycle;		/*é‡‡é›†å‘¨æœŸ*/
+	__int64 initialFlow; /*åˆå§‹æµé‡*/
+	int algFuncType;    /**< ç®—æ³•åŠŸèƒ½. */
+	int camstate;    /**< ä¸»åŠ¨ä¸Šä¼ æ ‡å¿—. */
 	CamState()
 	{
 		business_type = static_cast<char>(BusinessType::CAMERA_STATE_TYPE);
@@ -152,4 +152,4 @@ struct NetPackage
 	}
 };
 
-#pragma pack(pop)   /**< »Ö¸´¶ÔÆë×´Ì¬. */
+#pragma pack(pop)   /**< æ¢å¤å¯¹é½çŠ¶æ€. */

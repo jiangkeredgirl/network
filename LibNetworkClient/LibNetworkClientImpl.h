@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "kutility.h"
 #include "LibNetworkClient.h"

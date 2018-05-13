@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "tcpclienthandler.h"
 
 class BusinessClientHandlerCenter : public ITcpClientHandler

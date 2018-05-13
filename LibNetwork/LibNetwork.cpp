@@ -1,25 +1,25 @@
-// LibNetwork.cpp : ¶¨Òå DLL Ó¦ÓÃ³ÌÐòµÄµ¼³öº¯Êý¡£
+ï»¿// LibNetwork.cpp : å®šä¹‰ DLL åº”ç”¨ç¨‹åºçš„å¯¼å‡ºå‡½æ•°ã€‚
 //
 
 #include "targetver.h"
 
-#define WIN32_LEAN_AND_MEAN             //  ´Ó Windows Í·ÎÄ¼þÖÐÅÅ³ý¼«ÉÙÊ¹ÓÃµÄÐÅÏ¢
-// Windows Í·ÎÄ¼þ: 
+#define WIN32_LEAN_AND_MEAN             //  ä»Ž Windows å¤´æ–‡ä»¶ä¸­æŽ’é™¤æžå°‘ä½¿ç”¨çš„ä¿¡æ¯
+// Windows å¤´æ–‡ä»¶: 
 #include <windows.h>
 #include "LibNetwork.h"
 
 
-// ÕâÊÇµ¼³ö±äÁ¿µÄÒ»¸öÊ¾Àý
+// è¿™æ˜¯å¯¼å‡ºå˜é‡çš„ä¸€ä¸ªç¤ºä¾‹
 LIBNETWORK_API int nLibNetwork=0;
 
-// ÕâÊÇµ¼³öº¯ÊýµÄÒ»¸öÊ¾Àý¡£
+// è¿™æ˜¯å¯¼å‡ºå‡½æ•°çš„ä¸€ä¸ªç¤ºä¾‹ã€‚
 LIBNETWORK_API int fnLibNetwork(void)
 {
 	return 42;
 }
 
-// ÕâÊÇÒÑµ¼³öÀàµÄ¹¹Ôìº¯Êý¡£
-// ÓÐ¹ØÀà¶¨ÒåµÄÐÅÏ¢£¬Çë²ÎÔÄ LibNetwork.h
+// è¿™æ˜¯å·²å¯¼å‡ºç±»çš„æž„é€ å‡½æ•°ã€‚
+// æœ‰å…³ç±»å®šä¹‰çš„ä¿¡æ¯ï¼Œè¯·å‚é˜… LibNetwork.h
 CLibNetwork::CLibNetwork()
 {
 	return;

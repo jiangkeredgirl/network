@@ -1,8 +1,8 @@
-// dllmain.cpp : ╤╗рЕ DLL с╕сцЁлпР╣дхК©з╣Ц║ё
+О╩©// dllmain.cpp : Е╝ Д╧┴ DLL Е╨■Г■╗Г╗▀Е╨▐Г └Е┘╔Е▐ёГ┌╧Ц─┌
 #include "targetver.h"
 
-#define WIN32_LEAN_AND_MEAN             //  ╢с Windows м╥нд╪ЧжпееЁЩ╪╚иый╧сц╣дпео╒
-// Windows м╥нд╪Ч: 
+#define WIN32_LEAN_AND_MEAN             //  Д╩▌ Windows Е╓╢Ф√┤Д╩╤Д╦╜Ф▌▓И≥╓Ф·│Е╟▒Д╫©Г■╗Г └Д©║Ф│╞
+// Windows Е╓╢Ф√┤Д╩╤: 
 #include <windows.h>
 
 BOOL APIENTRY DllMain( HMODULE hModule,

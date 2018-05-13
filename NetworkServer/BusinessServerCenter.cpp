@@ -1,4 +1,4 @@
-#include "BusinessServerCenter.h"
+ï»¿#include "BusinessServerCenter.h"
 #include "BusinessProtocol.h"
 #include "tcpserverhandler.h"
 
@@ -25,8 +25,8 @@ int BusinessServerCenter::Run()
 	string input_flag;
 	do
 	{
-		cout << "ÒÑÆô¶¯ÒµÎñ·þÎñÆ÷²âÊÔ" << endl;
-		cout << "ÊäÈëº¯ÊýÃû, c¹Ø±Õ¿Í»§¶Ë²âÊÔ\n" << endl;
+		cout << "å·²å¯åŠ¨ä¸šåŠ¡æœåŠ¡å™¨æµ‹è¯•" << endl;
+		cout << "è¾“å…¥å‡½æ•°å, cå…³é—­å®¢æˆ·ç«¯æµ‹è¯•\n" << endl;
 		RegisterSendFuns();
 		cin >> input_flag;
 		if (input_flag == "c")
@@ -35,13 +35,13 @@ int BusinessServerCenter::Run()
 		}
 		else
 		{
-			cout << "ÊäÈëÁ´½Óid\n" << endl;
+			cout << "è¾“å…¥é“¾æŽ¥id\n" << endl;
 			int connect_session = 0;
 			cin >> connect_session;
 			TestSendFun(input_flag, connect_session);
 		}
 	} while (true);
-	cout << "¿Í»§¶Ë²âÊÔÒÑ¹Ø±Õ" << endl;
+	cout << "å®¢æˆ·ç«¯æµ‹è¯•å·²å…³é—­" << endl;
 	return 0;
 }
 
@@ -80,7 +80,7 @@ int BusinessServerCenter::SendCamConfig(shared_ptr<ITcpConnect> connect)
 
 int BusinessServerCenter::SendBinaryData(shared_ptr<ITcpConnect> connect, const char* data, size_t size)
 {
-	/// ×é°ü
+	/// ç»„åŒ…
 	NetPackage package;
 	//package.package_type = NetPackage::BINARY;
 	package.business_data_size = size + sizeof(package.check) + sizeof(package.end);
@@ -107,7 +107,7 @@ int BusinessServerCenter::TestSendFun(const string& fun_name, int connect_sessio
 	}
 	else
 	{
-		cout << "²»´æÔÚ¸Ãº¯ÊýÃû:" << fun_name << endl;
+		cout << "ä¸å­˜åœ¨è¯¥å‡½æ•°å:" << fun_name << endl;
 	}
 	return 0;
 }
