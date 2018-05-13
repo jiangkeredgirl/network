@@ -1,17 +1,12 @@
 ﻿#include "tcpserveraccept.h"
-
+#include "kloglib.h"
 
 CTcpAccept::CTcpAccept(int port)
 {
 	m_tcpserver_handler = nullptr;
-	//m_acceptor = shared_ptr<ip::tcp::acceptor>(new ip::tcp::acceptor(m_ioservice, tcp::endpoint(tcp::v4(), port)));
-	//// ´òÓ¡µ±Ç°·þÎñÆ÷µØÖ·  
-	//std::cout << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port() << std::endl;
-	//DisplayIP();
-
 	m_acceptor = shared_ptr<ip::tcp::acceptor>(new ip::tcp::acceptor(m_ioservice, tcp::endpoint(tcp::v4(), port)));
-	// ´òÓ¡µ±Ç°·þÎñÆ÷µØÖ·  
-	std::cout << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port() << std::endl;
+	// 打印当前服务器地址  
+	TraceNoticeCout() << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port();
 	DisplayIP();
 }
 
@@ -27,46 +22,57 @@ int CTcpAccept::RegisterHandler(ITcpServerHandler* tcpserver_handler)
 
 int CTcpAccept::Start()
 {
+	m_server_stop = false;
 	m_thread_server = thread(bind(&CTcpAccept::TcpAccepterRunThread, this, false));	
 	return 0;
 }
 
 int CTcpAccept::AsyncStart()
 {
+	m_server_stop = false;
 	m_thread_server = thread(bind(&CTcpAccept::TcpAccepterRunThread, this, true));	
 	return 0;
 }
 
 int CTcpAccept::Stop()
 {
+	m_server_stop = true;
 	while (!GetConnects().empty())
 	{	
 		auto item = *GetConnects().begin();
 		item->Disconnect();
 	}
+	GetConnects().clear();
+	TraceDebugCout() << "disconnect all connects";
 	m_ioservice.stop();
 	if (m_thread_server.joinable())
 	{
-		cout << "waiting TcpAccepterRunThread end" << endl;
+		TraceDebugCout() << "waiting TcpAccepterRunThread end";
 		m_thread_server.join();
 	}
 	m_acceptor->close();
+	TraceDebugCout() << "acceptor closed";
 	return 0;
 }
 
 int CTcpAccept::TcpAccepterRunThread(bool async)
 {
+	TrackCout();
 	if (async)
 	{
 		AsyncStartAccept();
-		cout << "tcp server accepter runing" << endl;
+		TraceInfoCout() << "tcp server accepter runing";
 		m_ioservice.run();
-		cout << "tcp server accepter run over" << endl;
+		TraceInfoCout() << "tcp server accepter run over";
 	}
 	else
 	{
 		while (true)
 		{
+			if (m_server_stop)
+			{
+				break;
+			}
 			StartAccept();
 		}
 	}
@@ -77,8 +83,9 @@ int CTcpAccept::StartAccept()
 {
 	shared_ptr<CTcpServerSocket> connect = NewConnect();
 	m_acceptor->accept(connect->socket());
-	cout << "tcp server accept a connect, client ip:" << connect->socket().remote_endpoint().address() << endl;
+	TraceInfoCout() << "tcp server accept a connect, client ip:" << connect->socket().remote_endpoint().address();
 	m_connect_list.push_back(connect);
+	TraceInfoCout() << "current connects count is " << GetConnects().size();
 	connect->StartRead();
 	return 0;
 }
@@ -92,12 +99,17 @@ int CTcpAccept::AsyncStartAccept()
 
 void CTcpAccept::AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::system::error_code ec)
 {
-	cout << "tcp server accept a connect, client ip:" << connect->socket().remote_endpoint().address() << ", error code : " << ec.value() << ", error message : " << ec.message() << endl;
-	if (!ec)
+	if (ec)
 	{
-		// ¼ÌÐøµÈ´ýÁ¬½Ó
+		TraceErrorCout() << "tcp server accept a connect occur error, client ip:" << connect->socket().remote_endpoint().address() << ", error code : " << ec.value() << ", error message : " << ec.message();
+	}
+	else
+	{
+		TraceOKCout() << "tcp server accept a connect success, client ip:" << connect->socket().remote_endpoint().address();
+		// 继续等待连接
 		AsyncStartAccept();
 		m_connect_list.push_back(connect);
+		TraceInfoCout() << "current connects count is " << GetConnects().size();
 		connect->AsyncStartRead();
 	}
 }
@@ -121,7 +133,7 @@ void CTcpAccept::DisplayIP()
 	while (iter != end)
 	{
 		tcp::endpoint ep = *iter++;
-		std::cout << "ip:" << ep.address().to_string() << ", port:" << ep.port() << std::endl;
+		TraceInfoCout() << "ip:" << ep.address().to_string() << ", port:" << ep.port();
 	}
 }
 
@@ -134,12 +146,22 @@ shared_ptr<CTcpServerSocket> CTcpAccept::NewConnect()
 {
 	lock_guard<mutex> lock(m_mutex_connect_list);
 	shared_ptr<CTcpServerSocket> connect(new CTcpServerSocket(m_ioservice));
-	connect->RegisterHandler(
-		std::bind(&CTcpAccept::OnTcpConnect, this, std::placeholders::_1, std::placeholders::_2)
-		, std::bind(&CTcpAccept::OnTcpDisconnect, this, std::placeholders::_1, std::placeholders::_2)
-		, std::bind(&CTcpAccept::OnTcpRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
-		, std::bind(&CTcpAccept::OnTcpWrite, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	//m_connect_list.push_back(connect);
+	if (m_tcpserver_handler)
+	{
+		connect->RegisterHandler(
+			std::bind(&ITcpServerHandler::OnTcpConnect, m_tcpserver_handler, std::placeholders::_1, std::placeholders::_2)
+			, std::bind(&CTcpAccept::OnTcpDisconnect, this, std::placeholders::_1, std::placeholders::_2)
+			, std::bind(&ITcpServerHandler::OnTcpRead, m_tcpserver_handler, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4)
+			, std::bind(&ITcpServerHandler::OnTcpWrite, m_tcpserver_handler, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	}
+	else
+	{
+		connect->RegisterHandler(
+			nullptr
+			, std::bind(&CTcpAccept::OnTcpDisconnect, this, std::placeholders::_1, std::placeholders::_2)
+			, nullptr
+			, nullptr);
+	}
 	return connect;
 }
 
@@ -154,46 +176,46 @@ int CTcpAccept::DeleteConnect(shared_ptr<CTcpServerSocket> connect)
 			break;
 		}
 	}
+	TraceInfoCout() << "current connects count is " << GetConnects().size();
 	return 0;
 }
 
-int  CTcpAccept::OnTcpRead(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)
-{
-	cout << "from client ip:" << connect->socket().remote_endpoint().address() << "read completed, data:" << endl;
-	cout.write(data, size) << endl;
-	if (m_tcpserver_handler && size > 0)
-	{
-		m_tcpserver_handler->OnTcpRead(connect, data, size, status);
-	}
-	return 0;
-}
+//int  CTcpAccept::OnTcpRead(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)
+//{
+//	cout << "from client ip:" << connect->socket().remote_endpoint().address() << "read completed, data:" << endl;
+//	cout.write(data, size) << endl;
+//	if (m_tcpserver_handler && size > 0)
+//	{
+//		m_tcpserver_handler->OnTcpRead(connect, data, size, status);
+//	}
+//	return 0;
+//}
 
-int  CTcpAccept::OnTcpWrite(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)
-{
-	cout << "to client ip:" << connect->socket().remote_endpoint().address() << " write completed, data:" << endl;
-	cout.write(data, size) << endl;
-	if (m_tcpserver_handler)
-	{
-		m_tcpserver_handler->OnTcpWrite(connect, data, size, status);
-	}
-	return 0;
-}
+//int  CTcpAccept::OnTcpWrite(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status)
+//{
+//	cout << "to client ip:" << connect->socket().remote_endpoint().address() << " write completed, data:" << endl;
+//	cout.write(data, size) << endl;
+//	if (m_tcpserver_handler)
+//	{
+//		m_tcpserver_handler->OnTcpWrite(connect, data, size, status);
+//	}
+//	return 0;
+//}
 
-int  CTcpAccept::OnTcpConnect(shared_ptr<CTcpServerSocket> connect, int status)
-{
-	cout << "a connect connected from ip:" << connect->socket().remote_endpoint().address() << std::endl;
-	cout << "current connect count is " << GetConnects().size() << std::endl;
-	if (m_tcpserver_handler)
-	{
-		m_tcpserver_handler->OnTcpConnect(connect, status);
-	}
-	return 0;
-}
+//int  CTcpAccept::OnTcpConnect(shared_ptr<CTcpServerSocket> connect, int status)
+//{
+//	cout << "a connect connected from ip:" << connect->socket().remote_endpoint().address() << std::endl;
+//	cout << "current connect count is " << GetConnects().size() << std::endl;
+//	if (m_tcpserver_handler)
+//	{
+//		m_tcpserver_handler->OnTcpConnect(connect, status);
+//	}
+//	return 0;
+//}
 
 int  CTcpAccept::OnTcpDisconnect(shared_ptr<CTcpServerSocket> connect, int status)
 {
 	DeleteConnect(connect);
-	cout << "current connect count is " << GetConnects().size() << std::endl;
 	if (m_tcpserver_handler)
 	{
 		m_tcpserver_handler->OnTcpDisconnect(connect, status);

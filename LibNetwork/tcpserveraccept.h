@@ -2,7 +2,6 @@
   
 #include "kutility.h"
 #include <boost/asio.hpp>
-//#include <boost/bind.hpp>
 #include "tcpserversocket.h"
 
 using namespace boost::asio;
@@ -33,9 +32,9 @@ private:
 	int DeleteConnect(shared_ptr<CTcpServerSocket> connect);
 
 private:
-	int OnTcpRead(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
-	int OnTcpWrite(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
-	int OnTcpConnect(shared_ptr<CTcpServerSocket> connect, int status);
+	//int OnTcpRead(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
+	//int OnTcpWrite(shared_ptr<CTcpServerSocket> connect, const char* data, size_t size, int status);
+	//int OnTcpConnect(shared_ptr<CTcpServerSocket> connect, int status);
 	int OnTcpDisconnect(shared_ptr<CTcpServerSocket> connect, int status);
 	
 private:
@@ -49,5 +48,6 @@ private:
 	list<shared_ptr<CTcpServerSocket>> m_connect_list;
 	mutex              m_mutex_connect_list;
 	ITcpServerHandler* m_tcpserver_handler;
+	bool m_server_stop = false;
 };
 

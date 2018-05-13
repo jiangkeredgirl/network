@@ -117,7 +117,7 @@ void CTcpServerSocket::AsyncStartRead()
 
 void CTcpServerSocket::Disconnect()
 {
-	cout << "tcp server socket closed and delete current connect from connects list" << endl;
+	TraceInfoCout() << "tcp server socket closed and delete current connect from connects list" << endl;
 	boost::system::error_code ec;
 	if (m_socket.is_open())
 	{

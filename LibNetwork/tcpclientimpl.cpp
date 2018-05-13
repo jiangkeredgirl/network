@@ -1,6 +1,6 @@
 ﻿#include "tcpclientimpl.h"
 #include "tcpclientsocket.h"
-
+#include "kloglib.h"
 
 CTcpClientImpl::CTcpClientImpl()
 {
@@ -60,7 +60,7 @@ int CTcpClientImpl::AsyncTcpWrite(const char* data, size_t size)
 
 int CTcpClientImpl::OnTcpConnect(int status)
 {
-	cout << "tcp client connect status code:" << status << endl;
+	TraceInfoCout() << "tcp client connect status code:" << status;
 	if(m_handler)
 	{
 		m_handler->OnTcpConnect(status);
@@ -69,7 +69,7 @@ int CTcpClientImpl::OnTcpConnect(int status)
 }
 int CTcpClientImpl::OnTcpDisconnect(int status)
 {
-	cout << "tcp client disconnect status code:" << status << endl;
+	TraceInfoCout() << "tcp client disconnect status code:" << status;
 	if(m_handler)
 	{
 		m_handler->OnTcpDisconnect(status);
@@ -79,7 +79,7 @@ int CTcpClientImpl::OnTcpDisconnect(int status)
 
 int CTcpClientImpl::OnTcpRead(const char* data, size_t size, int status)
 {
-	cout << "tcp client read completed, status code:" << status << ", read data : " << data << endl;
+	TraceInfoCout() << "tcp client read completed, status code:" << status;
 	if(m_handler)
 	{
 		m_handler->OnTcpRead(data, size, status);
@@ -88,7 +88,7 @@ int CTcpClientImpl::OnTcpRead(const char* data, size_t size, int status)
 }
 int CTcpClientImpl::OnTcpWrite(const char* data, size_t size, int status)
 {
-	cout << "tcp client write completed, status code:" << status << ", write data : " << data << endl;
+	TraceInfoCout() << "tcp client write completed, status code:" << status;
 	if(m_handler)
 	{
 		m_handler->OnTcpWrite(data, size, status);
