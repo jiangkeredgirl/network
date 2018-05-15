@@ -5,12 +5,10 @@
 
 class CTcpClientImpl : public ITcpClient
 {
-private:
+public:
 	CTcpClientImpl();
-public:
 	virtual ~CTcpClientImpl();
-public:
-	static CTcpClientImpl& instance();
+
 
 public:
 	virtual int RegisterHandler(ITcpClientHandler* tcpclient_handler) override;
@@ -20,11 +18,6 @@ public:
 	virtual int TcpWrite(const char* data, size_t size) override;
 	virtual int AsyncTcpWrite(const char* data, size_t size) override;
 
-//private:
-//	int OnTcpConnect(int status);
-//	int OnTcpDisconnect(int status);
-//	int OnTcpRead(const char* data, size_t size, int status);
-//	int OnTcpWrite(const char* data, size_t size, int status);
 
 private:
 	ITcpClientHandler* m_handler;

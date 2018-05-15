@@ -23,8 +23,10 @@ public:
 extern "C" {
 #endif
 
-	LIBNETWORK_API ITcpClient* GetTcpClientSingleInstance(void);
-	typedef ITcpClient* (*GetTcpClientSingleInstanceFun)(void);
+	LIBNETWORK_API ITcpClient* NewTcpClient(void);
+	typedef ITcpClient* (*NewTcpClientFun)(void);
+	LIBNETWORK_API void DeleteTcpClient(ITcpClient* tcp_client);
+	typedef void (*DeleteTcpClientFun)(ITcpClient* tcp_client);
 
 #ifdef __cplusplus
 }

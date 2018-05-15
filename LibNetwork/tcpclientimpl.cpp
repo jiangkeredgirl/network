@@ -12,12 +12,6 @@ CTcpClientImpl::~CTcpClientImpl()
 {
 }
 
-CTcpClientImpl& CTcpClientImpl::instance()
-{
-	static CTcpClientImpl _instance;
-	return _instance;
-}
-
 int CTcpClientImpl::RegisterHandler(ITcpClientHandler* tcpclient_handler)
 {
 	m_handler = tcpclient_handler;
@@ -68,46 +62,18 @@ int CTcpClientImpl::AsyncTcpWrite(const char* data, size_t size)
 {
 	return CTcpClientSocket::instance().AsyncWrite(data, size);
 }
+ 
 
-//int CTcpClientImpl::OnTcpConnect(int status)
-//{
-//	TraceInfoCout() << "tcp client connect status code:" << status;
-//	if(m_handler)
-//	{
-//		m_handler->OnTcpConnect(status);
-//	}
-//	return 0;
-//}
-//int CTcpClientImpl::OnTcpDisconnect(int status)
-//{
-//	TraceInfoCout() << "tcp client disconnect status code:" << status;
-//	if(m_handler)
-//	{
-//		m_handler->OnTcpDisconnect(status);
-//	}
-//	return 0;
-//}
-
-//int CTcpClientImpl::OnTcpRead(const char* data, size_t size, int status)
-//{
-//	TraceInfoCout() << "tcp client read completed, status code:" << status;
-//	if(m_handler)
-//	{
-//		m_handler->OnTcpRead(data, size, status);
-//	}
-//	return 0;
-//}
-//int CTcpClientImpl::OnTcpWrite(const char* data, size_t size, int status)
-//{
-//	TraceInfoCout() << "tcp client write completed, status code:" << status;
-//	if(m_handler)
-//	{
-//		m_handler->OnTcpWrite(data, size, status);
-//	}
-//	return 0;
-//}
-
-LIBNETWORK_API ITcpClient* GetTcpClientSingleInstance(void)
+LIBNETWORK_API ITcpClient* NewTcpClient(void)
 {
-	return &CTcpClientImpl::instance();
+	return new CTcpClientImpl();
+}
+
+LIBNETWORK_API void DeleteTcpClient(ITcpClient* tcp_client)
+{
+	if (tcp_client)
+	{
+		delete dynamic_cast<CTcpClientImpl*>(tcp_client);
+		tcp_client = nullptr;
+	}
 }

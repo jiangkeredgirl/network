@@ -25,6 +25,8 @@ extern "C" {
 
 	LIBNETWORK_API ITcpServer* NewTcpServer(int port);
 	typedef ITcpServer* (*NewTcpServerFun)(int port);
+	LIBNETWORK_API void DeleteTcpServer(ITcpServer* tcp_server);
+	typedef void(*DeleteTcpServerFun)(ITcpServer* tcp_server);
 
 #ifdef __cplusplus
 }

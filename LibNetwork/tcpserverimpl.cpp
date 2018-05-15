@@ -69,3 +69,12 @@ LIBNETWORK_API ITcpServer* NewTcpServer(int port)
 {
 	return new CTcpServerImpl(port);
 }
+
+LIBNETWORK_API void DeleteTcpServer(ITcpServer* tcp_server)
+{
+	if (tcp_server)
+	{
+		delete dynamic_cast<CTcpServerImpl*>(tcp_server);
+		tcp_server = nullptr;
+	}
+}
