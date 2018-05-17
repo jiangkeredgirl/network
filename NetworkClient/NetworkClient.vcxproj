@@ -191,15 +191,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BusinessClientCenter.h" />
-    <ClInclude Include="BusinessClientHandlerCenter.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TcpClientCenter.h" />
     <ClInclude Include="TcpClientHandlerCenter.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BusinessClientCenter.cpp" />
-    <ClCompile Include="BusinessClientHandlerCenter.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="TcpClientCenter.cpp" />
     <ClCompile Include="TcpClientHandlerCenter.cpp" />

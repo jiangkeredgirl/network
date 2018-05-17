@@ -1,8 +1,7 @@
 ﻿#include "TcpServerCenter.h"
 #include "LibNetworkServer.h"
 #include "TcpServerHandlerCenter.h"
-#include "BusinessServerHandlerCenter.h"
-#include "BusinessServerCenter.h"
+
 
 TcpServerCenter::TcpServerCenter()
 {
@@ -29,19 +28,10 @@ int TcpServerCenter::Run(bool async)
 	{
 		port = stoi(strport);
 	}
-	cout << "输入服务器业务类型, 默认tcp服务器, b 业务服务器, d 设备源服务器" << endl;
-	string str_server_type;
-	getline(std::cin, str_server_type);
 
 	ILibNetworkServer* tcpserver = NewNetworkServer(port);
-	if (str_server_type == "b")
-	{
-		tcpserver->RegisterHandler(&BusinessServerHandlerCenter::instance());
-	}
-	else
-	{
-		tcpserver->RegisterHandler(&TcpServerHandlerCenter::instance());
-	}
+	tcpserver->RegisterHandler(&TcpServerHandlerCenter::instance());
+	
 	if (async)
 	{
 		tcpserver->AsyncStart();
@@ -55,14 +45,6 @@ int TcpServerCenter::Run(bool async)
 	string input_flag;
 	do
 	{
-		if (str_server_type == "b")
-		{
-			BusinessServerCenter::instance().Run();
-		}
-		else if (str_server_type == "d")
-		{
-
-		}
 		cout << "输入字符串将发送到客户端, c关闭服务器" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
