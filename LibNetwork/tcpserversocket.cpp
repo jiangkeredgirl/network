@@ -98,7 +98,7 @@ void CTcpServerSocket::StartRead()
 		}
 		if (m_read_callback)
 		{
-			(TraceTempCout() << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
+			TraceTempCout() << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
 			m_read_callback(shared_from_this(), m_read_package->body(), readed_size, ec.value());
 		}
 
@@ -115,21 +115,21 @@ void CTcpServerSocket::AsyncStartRead()
 	ReadHeader();
 }
 
-void CTcpServerSocket::Disconnect()
+void CTcpServerSocket::Disconnect(int error_code)
 {
 	TraceInfoCout() << "tcp server socket closed and delete current connect from connects list" << endl;
 	boost::system::error_code ec;
 	if (m_socket.is_open())
 	{
 		//cout << "tcp server disconected a connet, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
-		m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
 	}
-	//shared_ptr<CTcpServerSocket> connect = shared_from_this();
-	//if (m_disconnect_callback)
-	//{
-	//	m_disconnect_callback(connect, 0);
-	//}
+	shared_ptr<CTcpServerSocket> connect = shared_from_this();
+	if (m_disconnect_callback)
+	{
+		m_disconnect_callback(connect, error_code);
+	}
 }
 
 void CTcpServerSocket::DoWrite()
@@ -152,7 +152,7 @@ void CTcpServerSocket::DoWrite()
 			{
 				if (m_write_callback)
 				{
-					(TraceTempCout() << "tcp server writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:").write(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size);
+					TraceTempCout() << "tcp server writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:" << m_write_packages.front()->body();
 					m_write_callback(shared_from_this(), m_write_packages.front()->body(), m_write_packages.front()->header()->body_size, ec.value());
 				}
 				m_write_packages.pop_front();
@@ -201,7 +201,7 @@ void CTcpServerSocket::ReadBody()
 		boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
 		[this](boost::system::error_code ec, std::size_t length)
 	{
-		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
+		int error_code = ReadErrorCheck(ec, length, m_read_package->header()->body_size);
 		if (error_code)
 		{
 			if (m_read_callback)
@@ -214,7 +214,7 @@ void CTcpServerSocket::ReadBody()
 			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
 			if (m_read_callback)
 			{
-				(TraceTempCout() << "tcp server readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
+				TraceTempCout() << "tcp server readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
 				m_read_callback(shared_from_this(), m_read_package->body(), m_read_package->header()->body_size, ec.value());
 			}
 			ReadHeader();
@@ -229,14 +229,12 @@ int CTcpServerSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 	{
 		if (ec == boost::asio::error::eof)
 		{
-			TraceInfoCout() << "tcp server read eof";
+			TraceErrorCout() << "tcp server read eof";
 			break;
 		}
 		if (ec)
 		{
 			TraceErrorCout() << "tcp server read error, error code:" << ec.value() << ", error message:" << ec.message();
-			//std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-			//th.detach();
 			break;
 		}
 		if (readed_size != require_read_size)
@@ -246,6 +244,11 @@ int CTcpServerSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 		}
 		error_code = 0;
 	} while (false);
+	if (error_code)
+	{
+		std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
+		th.detach();
+	}
 	return error_code;
 }
 
@@ -257,8 +260,6 @@ int CTcpServerSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 		if (ec)
 		{
 			TraceErrorCout() << "tcp server write error, error code:" << ec.value() << ", error message:" << ec.message();
-			//std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-			//th.detach();
 			break;
 		}
 		if (writed_size != require_write_size)
@@ -268,5 +269,10 @@ int CTcpServerSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 		}
 		error_code = 0;
 	} while (false);
+	if (error_code)
+	{
+		std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
+		th.detach();
+	}
 	return error_code;
 }

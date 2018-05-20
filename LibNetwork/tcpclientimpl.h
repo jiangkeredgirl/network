@@ -2,6 +2,7 @@
 
 #include "kutility.h"
 #include "tcpclient.h"
+#include "tcpclientsocket.h"
 
 class CTcpClientImpl : public ITcpClient
 {
@@ -21,5 +22,6 @@ public:
 
 private:
 	ITcpClientHandler* m_handler;
+	CTcpClientSocket   m_tcp_client_socket;
 };
 

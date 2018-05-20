@@ -27,7 +27,7 @@ public:
 	NetDataPackage(const char* _body, size_t _body_size)
 	{
 		m_header.body_size = _body_size;
-		size_t data_size = HEADER_SIZE + m_header.body_size;
+		size_t data_size = HEADER_SIZE + m_header.body_size + 2;  // +2 for contain '\0'
 		m_data = shared_ptr<char>(new char[data_size]);
 		memset(&(*m_data), 0, data_size);
 		memcpy(&(*m_data), &m_header, HEADER_SIZE);
@@ -43,7 +43,7 @@ public:
 			{
 				break;
 			}
-			size_t data_size = HEADER_SIZE + m_header.body_size;
+			size_t data_size = HEADER_SIZE + m_header.body_size + 2; // +2 for contain '\0'
 			m_data = shared_ptr<char>(new char[data_size]);
 			memset(&(*m_data), 0, data_size);
 			memcpy(&(*m_data), &m_header, HEADER_SIZE);

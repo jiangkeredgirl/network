@@ -1,5 +1,4 @@
 ﻿#include "tcpclientimpl.h"
-#include "tcpclientsocket.h"
 #include "kloglib.h"
 
 CTcpClientImpl::CTcpClientImpl()
@@ -17,7 +16,7 @@ int CTcpClientImpl::RegisterHandler(ITcpClientHandler* tcpclient_handler)
 	m_handler = tcpclient_handler;
 	if (m_handler)
 	{
-		CTcpClientSocket::instance().RegisterHandler(
+		m_tcp_client_socket.RegisterHandler(
 			std::bind(&ITcpClientHandler::OnTcpConnect, m_handler, std::placeholders::_1)
 			, std::bind(&ITcpClientHandler::OnTcpDisconnect, m_handler, std::placeholders::_1)
 			, std::bind(&ITcpClientHandler::OnTcpRead, m_handler, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)
@@ -25,7 +24,7 @@ int CTcpClientImpl::RegisterHandler(ITcpClientHandler* tcpclient_handler)
 	}
 	else
 	{
-		CTcpClientSocket::instance().RegisterHandler(
+		m_tcp_client_socket.RegisterHandler(
 			nullptr
 			, nullptr
 			, nullptr
@@ -37,30 +36,30 @@ int CTcpClientImpl::RegisterHandler(ITcpClientHandler* tcpclient_handler)
 int CTcpClientImpl::TcpConnect(const string& ip, int port)
 {
 	int error_code = 0;
-	error_code = CTcpClientSocket::instance().Connect(ip, port);
+	error_code = m_tcp_client_socket.Connect(ip, port);
 	return error_code;
 }
 
 int CTcpClientImpl::AsyncTcpConnect(const string& ip, int port)
 {
 	int error_code = 0;
-	error_code =  CTcpClientSocket::instance().AsyncConnect(ip, port);
+	error_code =  m_tcp_client_socket.AsyncConnect(ip, port);
 	return error_code;
 }
 
 int CTcpClientImpl::TcpDisconnect()
 {
-	return CTcpClientSocket::instance().Disconnect();
+	return m_tcp_client_socket.Disconnect();
 }
 
 int CTcpClientImpl::TcpWrite(const char* data, size_t size)
 {
-	return CTcpClientSocket::instance().Write(data, size);
+	return m_tcp_client_socket.Write(data, size);
 }
 
 int CTcpClientImpl::AsyncTcpWrite(const char* data, size_t size)
 {
-	return CTcpClientSocket::instance().AsyncWrite(data, size);
+	return m_tcp_client_socket.AsyncWrite(data, size);
 }
  
 

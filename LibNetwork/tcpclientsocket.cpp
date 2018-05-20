@@ -11,12 +11,6 @@ CTcpClientSocket::~CTcpClientSocket()
 {
 }
 
-CTcpClientSocket& CTcpClientSocket::instance()
-{
-	static CTcpClientSocket _instance;
-	return _instance;
-}
-
 int CTcpClientSocket::RegisterHandler(f_connect connect_callback, f_disconnect disconnect_callback, f_read read_callback, f_write write_callback)
 {
 	m_connect_callback = connect_callback;
@@ -226,7 +220,7 @@ void CTcpClientSocket::DoWrite()
 			{
 				if (m_write_callback)
 				{
-					(TraceTempCout() << "tcp client writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:").write(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size);
+					TraceTempCout() << "tcp client writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:" << m_write_packages.front()->body();
 					m_write_callback(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size, ec.value());
 				}
 				m_write_packages.pop_front();
@@ -275,7 +269,7 @@ void CTcpClientSocket::ReadBody()
 		boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
 		[this](boost::system::error_code ec, std::size_t length)
 	{
-		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
+		int error_code = ReadErrorCheck(ec, length, m_read_package->header()->body_size);
 		if (error_code)
 		{
 			if (m_read_callback)
@@ -288,7 +282,7 @@ void CTcpClientSocket::ReadBody()
 			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
 			if (m_read_callback)
 			{
-				(TraceTempCout() << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
+				TraceTempCout() << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
 				m_read_callback(m_read_package->body(), m_read_package->header()->body_size, ec.value());
 			}
 			ReadHeader();

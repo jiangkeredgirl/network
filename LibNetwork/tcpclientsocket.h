@@ -15,12 +15,10 @@ typedef function<int(const char* data, size_t size, int status)> f_write;
 
 class CTcpClientSocket : public enable_shared_from_this<CTcpClientSocket>
 {
-private:
+public:
 	CTcpClientSocket();
-public:
 	virtual ~CTcpClientSocket();
-public:
-	static CTcpClientSocket& instance();
+
 public:
 	int RegisterHandler(f_connect connect_callback = nullptr, f_disconnect disconnect_callback = nullptr, f_read read_callback = nullptr, f_write write_callback = nullptr);
 	int SetReconnectTime(__int64 reconnect_second);

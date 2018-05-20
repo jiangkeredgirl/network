@@ -17,13 +17,11 @@ TcpServerHandlerCenter& TcpServerHandlerCenter::instance()
 
 int  TcpServerHandlerCenter::OnTcpRead(shared_ptr<ITcpConnect> connect, const char* data, size_t size, int status)
 {
-	cout << "\nread_buffer: " << data << endl;
 	return 0;
 }
 
 int  TcpServerHandlerCenter::OnTcpWrite(shared_ptr<ITcpConnect> connect, const char* data, size_t size, int status)
 {
-	cout << "\nwrite_buffer: " << data << endl;
 	return 0;
 }
 

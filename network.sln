@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibNetwork", "LibNetwork\LibNetwork.vcxproj", "{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkServer", "NetworkServer\NetworkServer.vcxproj", "{B7E20875-659F-4713-9F58-095D2CC5D874}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED} = {86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkClient", "NetworkClient\NetworkClient.vcxproj", "{518010AA-9729-41D3-97EF-DBAA2052CC25}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED} = {86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

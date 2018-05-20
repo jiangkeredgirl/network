@@ -30,7 +30,7 @@ public:
 	int RegisterHandler(f_connect connect_callback = nullptr, f_disconnect disconnect_callback = nullptr, f_read read_callback = nullptr, f_write write_callback = nullptr);
 	void StartRead();
 	void AsyncStartRead();
-	void Disconnect();
+	void Disconnect(int error_code);
 	tcp::socket& socket()	{ return m_socket; }
 
 private:

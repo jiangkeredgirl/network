@@ -40,7 +40,7 @@ int CTcpAccept::Stop()
 	while (!GetConnects().empty())
 	{	
 		auto item = *GetConnects().begin();
-		item->Disconnect();
+		item->Disconnect(0);
 	}
 	GetConnects().clear();
 	TraceDebugCout() << "disconnect all connects";
