@@ -11,7 +11,7 @@ using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	cout << "输入服务器类型, 默认异步, s同步" << endl;
+	cout << "please server type, defualt async, \'s\' indicate sync" << endl;
 	string server_type;
 	getline(std::cin, server_type);
 	if (server_type == "s")

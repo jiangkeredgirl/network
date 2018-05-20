@@ -1,6 +1,7 @@
 ﻿#include "TcpServerCenter.h"
-#include "LibNetworkServer.h"
+#include "tcpserver.h"
 #include "TcpServerHandlerCenter.h"
+#include "cstandard.h"
 
 
 TcpServerCenter::TcpServerCenter()
@@ -20,7 +21,7 @@ TcpServerCenter& TcpServerCenter::instance()
 
 int TcpServerCenter::Run(bool async)
 {
-	cout << "输入服务器端口, 例如:9000" << endl;
+	cout << "please input server port, such as:9000" << endl;
 	string strport;
 	getline(std::cin, strport);
 	int port = 9000;
@@ -29,23 +30,23 @@ int TcpServerCenter::Run(bool async)
 		port = stoi(strport);
 	}
 
-	ILibNetworkServer* tcpserver = NewNetworkServer(port);
+	ITcpServer* tcpserver = NewTcpServer(port);
 	tcpserver->RegisterHandler(&TcpServerHandlerCenter::instance());
 	
 	if (async)
 	{
 		tcpserver->AsyncStart();
-		cout << "tcp异步服务器已启动, 端口:" << port << endl;
+		cout << "tcp async server runing, port:" << port << endl;
 	}
 	else
 	{
 		tcpserver->Start();
-		cout << "tcp同步服务器已启动, 端口:" << port << endl;
+		cout << "tcp sync server runing, port:" << port << endl;
 	}
 	string input_flag;
 	do
 	{
-		cout << "输入字符串将发送到客户端, c关闭服务器" << endl;
+		cout << "please input text for send to server, \'c\' will close server" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
 		{
@@ -61,7 +62,11 @@ int TcpServerCenter::Run(bool async)
 		}
 	} while (true);
 	tcpserver->Stop();
-	cout << "tcp服务器已关闭" << endl;
+	cout << "tcp have closed" << endl;
+	if (tcpserver)
+	{
+		DeleteTcpServer(tcpserver);
+	}
 	system("pause");
 	return 0;
 }

@@ -1,6 +1,6 @@
 ﻿#include "TcpClientCenter.h"
 #include "TcpClientHandlerCenter.h"
-#include "LibNetworkClient.h"
+#include "tcpclient.h"
 #include "cstandard.h"
 using namespace std;
 
@@ -22,12 +22,13 @@ TcpClientCenter& TcpClientCenter::instance()
 int TcpClientCenter::Run(bool async)
 {
 	int error_code = 0;
+	ITcpClient*  tcp_client = NewTcpClient();
 	do
 	{
-		cout << "输入服务器ip地址, 例如:127.0.0.1" << endl;
+		cout << "please input server ip, such as:127.0.0.1" << endl;
 		string ip;
 		getline(std::cin, ip);
-		cout << "输入服务器端口, 例如:9000" << endl;
+		cout << "input server port, such as:9000" << endl;
 		string strport;
 		getline(std::cin, strport);
 		if (ip.empty())
@@ -39,37 +40,38 @@ int TcpClientCenter::Run(bool async)
 		{
 			port = stoi(strport);
 		}
-		error_code = GetNetworkClient()->RegisterHandler(&TcpClientHandlerCenter::instance());
+		
+		error_code = tcp_client->RegisterHandler(&TcpClientHandlerCenter::instance());
 
 		if (async)
 		{
-			error_code = GetNetworkClient()->AsyncTcpConnect(ip, port);
+			error_code = tcp_client->AsyncTcpConnect(ip, port);
 			if (error_code == 0)
 			{
-				cout << "tcp异步客户端已链接, 服务器ip:" << ip << ", 端口:" << port << endl;
+				cout << "tcp async client have connected, server ip:" << ip << ", port:" << port << endl;
 			}
 			else
 			{
-				cout << "tcp异步客户端链接失败, 服务器ip:" << ip << ", 端口:" << port << endl;
+				cout << "tcp async server connect occur error, server ip:" << ip << ", port:" << port << endl;
 			}
 		}
 		else
 		{
-			error_code = GetNetworkClient()->TcpConnect(ip, port);
+			error_code = tcp_client->TcpConnect(ip, port);
 			if (error_code == 0)
 			{
-				cout << "tcp同步客户端已链接, 服务器ip:" << ip << ", 端口:" << port << endl;
+				cout << "tcp sync client have connected, server ip:" << ip << ", port:" << port << endl;
 			}
 			else
 			{
-				cout << "tcp同步客户端链接失败, 服务器ip:" << ip << ", 端口:" << port << endl;
+				cout << "tcp sync client ocurr error, server ip:" << ip << ", port:" << port << endl;
 			}
 		}
 	} while (error_code != 0);
 	string input_flag;
 	do
 	{
-		cout << "输入字符串发送到客户端, c关闭连接\n" << endl;
+		cout << "please text for sending to server, \'c\' close connect\n" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
 		{
@@ -79,22 +81,24 @@ int TcpClientCenter::Run(bool async)
 		{
 			if (async)
 			{
-				GetNetworkClient()->AsyncTcpWrite(input_flag.c_str(), input_flag.size());
+				tcp_client->AsyncTcpWrite(input_flag.c_str(), input_flag.size());
 			}
 			else
 			{
-				GetNetworkClient()->TcpWrite(input_flag.c_str(), input_flag.size());
+				tcp_client->TcpWrite(input_flag.c_str(), input_flag.size());
 			}
 		}
 	} while (true);
-	GetNetworkClient()->TcpDisconnect();
-	cout << "tcp客户端已断开" << endl;
-	system("pause");
-	return 0;
-}
 
-int TcpClientCenter::SendData(const char* data, size_t size)
-{
-	GetNetworkClient()->AsyncTcpWrite(data, size);
+	if (error_code == 0)
+	{
+		tcp_client->TcpDisconnect();
+	}	
+	cout << "tcp client have disconnected" << endl;
+	if (tcp_client)
+	{
+		DeleteTcpClient(tcp_client);
+	}	
+	system("pause");
 	return 0;
 }
