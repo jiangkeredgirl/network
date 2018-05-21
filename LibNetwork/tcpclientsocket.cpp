@@ -76,26 +76,14 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 
 int CTcpClientSocket::Disconnect()
 {
-	TrackCout();
-	TraceInfoCout() << "tcp client disconnect, server ip:" << m_socket.remote_endpoint().address().to_string();
 	TraceInfoCout() << "tcp client socket will close";
 	boost::system::error_code ec;
 	m_keep_connect = false;
 	if (m_socket.is_open())
 	{
-		m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+		TraceInfoCout() << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
+		//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
-	}
-	TraceInfoCout() << "tcp client ioservice will stop";
-	m_ioservice.stop();
-	if (m_thread_client.joinable())
-	{
-		TraceInfoCout() << "waiting SocketClientRunThread over";
-		m_thread_client.join();
-	}
-	if (m_disconnect_callback)
-	{
-		m_disconnect_callback(ec.value());
 	}
 	return 0;
 }
@@ -297,14 +285,12 @@ int CTcpClientSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 	{
 		if (ec == boost::asio::error::eof)
 		{
-			TraceInfoCout() << "tcp client read eof";
+			TraceErrorCout() << "tcp client read eof";
 			break;
 		}
 		if (ec)
 		{
 			TraceErrorCout() << "tcp client read error, error code:" << ec.value() << ", error message:" << ec.message();
-			//std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-			//th.detach();
 			break;
 		}
 		if (readed_size != require_read_size)
@@ -314,6 +300,10 @@ int CTcpClientSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 		}
 		error_code = 0;
 	} while (false);
+	if (error_code)
+	{
+		ProcessSocketError(ec.value());
+	}
 	return error_code;
 }
 
@@ -325,8 +315,6 @@ int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 		if (ec)
 		{
 			TraceErrorCout() << "tcp client write error, error code:" << ec.value() << ", error message:" << ec.message();
-			//std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-			//th.detach();
 			break;
 		}
 		if (writed_size != require_write_size)
@@ -336,5 +324,37 @@ int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 		}
 		error_code = 0;
 	} while (false);
+	if (error_code)
+	{
+		ProcessSocketError(ec.value());
+	}
 	return error_code;
+}
+
+int CTcpClientSocket::ProcessSocketError(int error_code)
+{
+	std::thread th = std::thread([this, error_code]() {
+		TraceInfoCout() << "tcp client socket occur error, will close socket";
+		boost::system::error_code ec;
+		m_keep_connect = false;
+		if (m_socket.is_open())
+		{
+			TraceInfoCout() << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
+			//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+			m_socket.close(ec); // excute this statement occure crash
+		}
+		TraceInfoCout() << "tcp client ioservice will stop";
+		m_ioservice.stop();
+		if (m_thread_client.joinable())
+		{
+			TraceInfoCout() << "waiting SocketClientRunThread over";
+			m_thread_client.join();
+		}
+		if (m_disconnect_callback)
+		{
+			m_disconnect_callback(error_code);
+		}
+	});
+	th.detach();
+	return 0;
 }

@@ -30,7 +30,7 @@ public:
 	int RegisterHandler(f_connect connect_callback = nullptr, f_disconnect disconnect_callback = nullptr, f_read read_callback = nullptr, f_write write_callback = nullptr);
 	void StartRead();
 	void AsyncStartRead();
-	void Disconnect(int error_code);
+	void Disconnect();	
 	tcp::socket& socket()	{ return m_socket; }
 
 private:
@@ -39,6 +39,7 @@ private:
 	void ReadBody();
 	int ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
 	int WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
+	int ProcessSocketError(int error_code);
 
 private:
 	tcp::socket m_socket;

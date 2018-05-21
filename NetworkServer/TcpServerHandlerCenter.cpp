@@ -27,10 +27,12 @@ int  TcpServerHandlerCenter::OnTcpWrite(shared_ptr<ITcpConnect> connect, const c
 
 int  TcpServerHandlerCenter::OnTcpConnect(shared_ptr<ITcpConnect> connect, int status)
 {
+	cout << "have connected, status:" << status << endl;
 	return 0;
 }
 
 int  TcpServerHandlerCenter::OnTcpDisconnect(shared_ptr<ITcpConnect> connect, int status)
 {
+	cout << "have disconnected, status:" << status << endl;
 	return 0;
 }

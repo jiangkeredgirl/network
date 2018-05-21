@@ -35,6 +35,7 @@ private:
 	void ReadBody();
 	int ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
 	int WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
+	int ProcessSocketError(int error_code);
 	//int Reconnect();
 	//int DoConnect();
 

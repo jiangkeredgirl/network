@@ -115,20 +115,15 @@ void CTcpServerSocket::AsyncStartRead()
 	ReadHeader();
 }
 
-void CTcpServerSocket::Disconnect(int error_code)
+void CTcpServerSocket::Disconnect()
 {
-	TraceInfoCout() << "tcp server socket closed and delete current connect from connects list" << endl;
+	TraceInfoCout() << "tcp server will disconnect a connect" << endl;
 	boost::system::error_code ec;
 	if (m_socket.is_open())
 	{
-		//cout << "tcp server disconected a connet, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
+		TraceInfoCout() << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
 		//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
-	}
-	shared_ptr<CTcpServerSocket> connect = shared_from_this();
-	if (m_disconnect_callback)
-	{
-		m_disconnect_callback(connect, error_code);
 	}
 }
 
@@ -246,8 +241,7 @@ int CTcpServerSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 	} while (false);
 	if (error_code)
 	{
-		std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-		th.detach();
+		ProcessSocketError(ec.value());
 	}
 	return error_code;
 }
@@ -271,8 +265,28 @@ int CTcpServerSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 	} while (false);
 	if (error_code)
 	{
-		std::thread th = std::thread([this, ec]() {Disconnect(ec.value()); });
-		th.detach();
+		ProcessSocketError(ec.value());
 	}
 	return error_code;
+}
+
+int CTcpServerSocket::ProcessSocketError(int error_code)
+{
+	std::thread th = std::thread([this, error_code]() {
+		TraceInfoCout() << "socket occur error, will close socket" << endl;
+		boost::system::error_code ec;
+		if (m_socket.is_open())
+		{
+			TraceInfoCout() << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string();
+			//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+			m_socket.close(ec); // excute this statement occure crash
+		}
+		shared_ptr<CTcpServerSocket> connect = shared_from_this();
+		if (m_disconnect_callback)
+		{
+			m_disconnect_callback(connect, error_code);
+		}
+	});
+	th.detach();
+	return 0;
 }
