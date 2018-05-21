@@ -82,8 +82,14 @@ int CTcpClientSocket::Disconnect()
 	if (m_socket.is_open())
 	{
 		TraceInfoCout() << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
-		//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
+	}
+	TraceInfoCout() << "tcp client ioservice will stop";
+	m_ioservice.stop();
+	if (m_thread_client.joinable())
+	{
+		TraceInfoCout() << "waiting SocketClientRunThread over";
+		m_thread_client.join();
 	}
 	return 0;
 }
@@ -340,15 +346,7 @@ int CTcpClientSocket::ProcessSocketError(int error_code)
 		if (m_socket.is_open())
 		{
 			TraceInfoCout() << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
-			//m_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
 			m_socket.close(ec); // excute this statement occure crash
-		}
-		TraceInfoCout() << "tcp client ioservice will stop";
-		m_ioservice.stop();
-		if (m_thread_client.joinable())
-		{
-			TraceInfoCout() << "waiting SocketClientRunThread over";
-			m_thread_client.join();
 		}
 		if (m_disconnect_callback)
 		{
