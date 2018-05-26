@@ -59,6 +59,7 @@ public:
 #else
 		server = NewTcpServer(port);
 #endif
+		return server;
 	}
 
 	void DeleteTcpServer(ITcpServer* tcp_server)
@@ -84,6 +85,7 @@ public:
 #else
 		client = NewTcpClient();
 #endif
+		return client;
 	}
 
 	void DeleteTcpClient(ITcpClient* tcp_client)

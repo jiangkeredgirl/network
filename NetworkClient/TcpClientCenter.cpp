@@ -22,7 +22,7 @@ TcpClientCenter& TcpClientCenter::instance()
 int TcpClientCenter::Run(bool async)
 {
 	int error_code = 0;
-	ITcpClient*  tcp_client = NewTcpClient();
+	ITcpClient*  tcp_client = TcpLibrary::instance()->NewTcpClient();
 	do
 	{
 		cout << "please input server ip, such as:127.0.0.1" << endl;
@@ -97,7 +97,7 @@ int TcpClientCenter::Run(bool async)
 	cout << "tcp client have disconnected" << endl;
 	if (tcp_client)
 	{
-		DeleteTcpClient(tcp_client);
+		TcpLibrary::instance()->DeleteTcpClient(tcp_client);
 	}	
 	system("pause");
 	return 0;

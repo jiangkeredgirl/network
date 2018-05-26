@@ -30,7 +30,7 @@ int TcpServerCenter::Run(bool async)
 		port = stoi(strport);
 	}
 
-	ITcpServer* tcpserver = NewTcpServer(port);
+	ITcpServer* tcpserver = TcpLibrary::instance()->NewTcpServer(port);
 	tcpserver->RegisterHandler(&TcpServerHandlerCenter::instance());
 	
 	if (async)
@@ -65,7 +65,7 @@ int TcpServerCenter::Run(bool async)
 	cout << "tcp have closed" << endl;
 	if (tcpserver)
 	{
-		DeleteTcpServer(tcpserver);
+		TcpLibrary::instance()->DeleteTcpServer(tcpserver);
 	}
 	system("pause");
 	return 0;
