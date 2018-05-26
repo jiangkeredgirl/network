@@ -180,6 +180,7 @@
     <ClInclude Include="tcpclienthandler.h" />
     <ClInclude Include="tcpclientimpl.h" />
     <ClInclude Include="tcpclientsocket.h" />
+    <ClInclude Include="TcpPackage.h" />
     <ClInclude Include="tcpserver.h" />
     <ClInclude Include="tcpserveraccept.h" />
     <ClInclude Include="tcpserverhandler.h" />

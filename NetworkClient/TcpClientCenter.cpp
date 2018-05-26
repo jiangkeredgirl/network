@@ -1,6 +1,6 @@
 ﻿#include "TcpClientCenter.h"
 #include "TcpClientHandlerCenter.h"
-#include "tcpclient.h"
+#include "TcpPackage.h"
 #include "cstandard.h"
 using namespace std;
 
