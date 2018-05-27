@@ -31,7 +31,8 @@ int TcpServerCenter::Run(bool async)
 	}
 
 	ITcpServer* tcpserver = TcpLibrary::instance()->NewTcpServer(port);
-	tcpserver->RegisterHandler(&TcpServerHandlerCenter::instance());
+	TcpServerHandlerCenter handler_center(tcpserver);
+	tcpserver->RegisterHandler(&handler_center);
 	
 	if (async)
 	{

@@ -23,8 +23,8 @@
 #include "tracepackage.h"
 
 // 是否生成trace 函数
-#define  TRACE_OUT             1                     ///< 0 not output log, 1 output log
-#define  TRACK_OUT             1                     ///< whether output trace of function called
+#define  TRACE_OUT             0                     ///< 0 not output log, 1 output log
+#define  TRACK_OUT             0                     ///< whether output trace of function called
 // 是否使用glog
 #define  USE_GLOG              0
 

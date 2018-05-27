@@ -17,6 +17,7 @@ public:
 	virtual int Stop() = 0;
 	virtual int Broadcast(const char* data, size_t size) = 0;
 	virtual int AsyncBroadcast(const char* data, size_t size) = 0;
+	virtual int GetConnectsCount() = 0;
 };
 
 #ifdef __cplusplus

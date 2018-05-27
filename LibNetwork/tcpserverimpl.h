@@ -17,7 +17,8 @@ public:
 	virtual int AsyncStart() override;
 	virtual int Stop() override;
 	virtual int Broadcast(const char* data, size_t size) override;
-	virtual int AsyncBroadcast(const char* data, size_t size) override;	
+	virtual int AsyncBroadcast(const char* data, size_t size) override;
+	virtual int GetConnectsCount() override;
 
 private:
 	shared_ptr<CTcpAccept> m_tcpacceptor;

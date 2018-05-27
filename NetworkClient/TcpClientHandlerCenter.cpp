@@ -11,11 +11,6 @@ TcpClientHandlerCenter::~TcpClientHandlerCenter()
 {
 }
 
-TcpClientHandlerCenter& TcpClientHandlerCenter::instance()
-{
-	static TcpClientHandlerCenter _instance;
-	return _instance;
-}
 
 int TcpClientHandlerCenter::OnTcpConnect(int status)
 {
@@ -31,10 +26,18 @@ int TcpClientHandlerCenter::OnTcpDisconnect(int status)
 
 int TcpClientHandlerCenter::OnTcpRead(const char* data, size_t size, int status)
 {
+	if (data)
+	{
+		cout << "readed data:" << data << endl;
+	}
 	return 0;
 }
 
 int TcpClientHandlerCenter::OnTcpWrite(const char* data, size_t size, int status)
 {
+	if (data)
+	{
+		cout << "writed data:" << data << endl;
+	}
 	return 0;
 }

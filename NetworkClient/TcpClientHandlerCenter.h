@@ -6,7 +6,6 @@ class TcpClientHandlerCenter : public ITcpClientHandler
 public:
 	TcpClientHandlerCenter();
 	~TcpClientHandlerCenter();
-	static TcpClientHandlerCenter& instance();
 
 public:
 	virtual int OnTcpConnect(int status) override;

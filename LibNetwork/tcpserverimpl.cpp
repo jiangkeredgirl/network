@@ -65,6 +65,11 @@ int CTcpServerImpl::AsyncBroadcast(const char* data, size_t size)
 	return 0;
 }
 
+int CTcpServerImpl::GetConnectsCount()
+{
+	return static_cast<int>(m_tcpacceptor->GetConnects().size());
+}
+
 LIBNETWORK_API ITcpServer* NewTcpServer(int port)
 {
 	return new CTcpServerImpl(port);
