@@ -6,7 +6,7 @@ CTcpAccept::CTcpAccept(int port)
 	m_tcpserver_handler = nullptr;
 	m_acceptor = shared_ptr<ip::tcp::acceptor>(new ip::tcp::acceptor(m_ioservice, tcp::endpoint(tcp::v4(), port)));
 	// 打印当前服务器地址  
-	TraceNoticeCout() << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port();
+	TraceNoticeCout << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port();
 	DisplayIP();
 }
 
@@ -43,27 +43,27 @@ int CTcpAccept::Stop()
 		item->Disconnect();
 	}
 	GetConnects().clear();
-	TraceDebugCout() << "disconnect all connects";
+	TraceDebugCout << "disconnect all connects";
 	m_ioservice.stop();
 	if (m_thread_server.joinable())
 	{
-		TraceDebugCout() << "waiting TcpAccepterRunThread end";
+		TraceDebugCout << "waiting TcpAccepterRunThread end";
 		m_thread_server.join();
 	}
 	m_acceptor->close();
-	TraceDebugCout() << "acceptor closed";
+	TraceDebugCout << "acceptor closed";
 	return 0;
 }
 
 int CTcpAccept::TcpAccepterRunThread(bool async)
 {
-	TrackCout();
+	TrackCout;
 	if (async)
 	{
 		AsyncStartAccept();
-		TraceInfoCout() << "tcp server accepter runing";
+		TraceInfoCout << "tcp server accepter runing";
 		m_ioservice.run();
-		TraceInfoCout() << "tcp server accepter run over";
+		TraceInfoCout << "tcp server accepter run over";
 	}
 	else
 	{
@@ -83,9 +83,9 @@ int CTcpAccept::StartAccept()
 {
 	shared_ptr<CTcpServerSocket> connect = NewConnect();
 	m_acceptor->accept(connect->socket());
-	TraceInfoCout() << "tcp server accept a connect, client ip:" << connect->socket().remote_endpoint().address();
+	TraceInfoCout << "tcp server accept a connect, client ip:" << connect->socket().remote_endpoint().address();
 	m_connect_list.push_back(connect);
-	TraceInfoCout() << "current connects count is " << GetConnects().size();
+	TraceInfoCout << "current connects count is " << GetConnects().size();
 	connect->StartRead();
 	return 0;
 }
@@ -101,15 +101,15 @@ void CTcpAccept::AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::syst
 {
 	if (ec)
 	{
-		TraceErrorCout() << "tcp server accept a connect occur error, client ip:" << connect->socket().remote_endpoint().address() << ", error code : " << ec.value() << ", error message : " << ec.message();
+		TraceErrorCout << "tcp server accept a connect occur error, client ip:" << connect->socket().remote_endpoint().address() << ", error code : " << ec.value() << ", error message : " << ec.message();
 	}
 	else
 	{
-		TraceOKCout() << "tcp server accept a connect success, client ip:" << connect->socket().remote_endpoint().address();
+		TraceOKCout << "tcp server accept a connect success, client ip:" << connect->socket().remote_endpoint().address();
 		// 继续等待连接
 		AsyncStartAccept();
 		m_connect_list.push_back(connect);
-		TraceInfoCout() << "current connects count is " << GetConnects().size();
+		TraceInfoCout << "current connects count is " << GetConnects().size();
 		connect->AsyncStartRead();
 	}
 }
@@ -133,7 +133,7 @@ void CTcpAccept::DisplayIP()
 	while (iter != end)
 	{
 		tcp::endpoint ep = *iter++;
-		TraceInfoCout() << "ip:" << ep.address().to_string() << ", port:" << ep.port();
+		TraceInfoCout << "ip:" << ep.address().to_string() << ", port:" << ep.port();
 	}
 }
 
@@ -176,7 +176,7 @@ int CTcpAccept::DeleteConnect(shared_ptr<CTcpServerSocket> connect)
 			break;
 		}
 	}
-	TraceInfoCout() << "current connects count is " << GetConnects().size();
+	TraceInfoCout << "current connects count is " << GetConnects().size();
 	return 0;
 }
 
