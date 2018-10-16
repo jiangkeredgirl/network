@@ -8,20 +8,20 @@ using namespace std;
 #include "tcpserver.h"
 
 
-#define KLOG_USE_DYNAMIC_DLL    1
+#define KNETWORK_USE_DYNAMIC_DLL    1
 
-#if KLOG_USE_DYNAMIC_DLL
+#if KNETWORK_USE_DYNAMIC_DLL
 #ifdef _WIN64
 #ifdef _DEBUG
-#define KLOG_DLL_NAME  "LibNetwork_x64_v141_Debug.dll"
+#define KNETWORK_DLL_NAME  "LibNetwork_x64_Debug.dll"
 #else
-#define KLOG_DLL_NAME  "LibNetwork_x64_v141_Release.dll"
+#define KNETWORK_DLL_NAME  "LibNetwork_x64_Release.dll"
 #endif
 #else
 #ifdef _DEBUG
-#define KLOG_DLL_NAME  "LibNetwork_x32_v141_Debug.dll"
+#define KNETWORK_DLL_NAME  "LibNetwork_x32_Debug.dll"
 #else
-#define KLOG_DLL_NAME  "LibNetwork_x32_v141_Release.dll"
+#define KNETWORK_DLL_NAME  "LibNetwork_x32_Release.dll"
 #endif
 #endif
 #endif
@@ -51,52 +51,52 @@ public:
 	ITcpServer* NewTcpServer(int port)
 	{
 		ITcpServer* server = nullptr;
-#if KLOG_USE_DYNAMIC_DLL
+#if KNETWORK_USE_DYNAMIC_DLL
 		if (m_NewTcpServer)
 		{
 			server = m_NewTcpServer(port);
 		}
 #else
-		server = NewTcpServer(port);
+		server = ::NewTcpServer(port);
 #endif
 		return server;
 	}
 
 	void DeleteTcpServer(ITcpServer* tcp_server)
 	{
-#if KLOG_USE_DYNAMIC_DLL
+#if KNETWORK_USE_DYNAMIC_DLL
 		if (m_DeleteTcpServer)
 		{
 			m_DeleteTcpServer(tcp_server);
 		}
 #else
-		DeleteTcpServer(tcp_server);
+		::DeleteTcpServer(tcp_server);
 #endif
 	}
 
 	ITcpClient* NewTcpClient(void)
 	{
 		ITcpClient* client = nullptr;
-#if KLOG_USE_DYNAMIC_DLL
+#if KNETWORK_USE_DYNAMIC_DLL
 		if (m_NewTcpClient)
 		{
 			client = m_NewTcpClient();
 		}
 #else
-		client = NewTcpClient();
+		client = ::NewTcpClient();
 #endif
 		return client;
 	}
 
 	void DeleteTcpClient(ITcpClient* tcp_client)
 	{
-#if KLOG_USE_DYNAMIC_DLL
+#if KNETWORK_USE_DYNAMIC_DLL
 		if (m_DeleteTcpClient)
 		{
 			m_DeleteTcpClient(tcp_client);
 		}
 #else
-		DeleteTcpClient(tcp_client);
+		::DeleteTcpClient(tcp_client);
 #endif
 	}
 
@@ -111,8 +111,8 @@ private:
 			{
 				break;
 			}
-#if KLOG_USE_DYNAMIC_DLL
-			m_hDll = LoadLibraryA(KLOG_DLL_NAME);
+#if KNETWORK_USE_DYNAMIC_DLL
+			m_hDll = LoadLibraryA(KNETWORK_DLL_NAME);
 #endif
 			if (m_hDll == nullptr)
 			{
