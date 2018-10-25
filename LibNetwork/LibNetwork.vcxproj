@@ -112,7 +112,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>PostBuildEvent.bat</Command>
+      <Command>PostBuildEvent.bat $(PlatformToolsetVersion)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,7 +128,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>PostBuildEvent.bat</Command>
+      <Command>PostBuildEvent.bat $(PlatformToolsetVersion)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -148,7 +148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>PostBuildEvent.bat</Command>
+      <Command>PostBuildEvent.bat $(PlatformToolsetVersion)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -168,7 +168,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>PostBuildEvent.bat</Command>
+      <Command>PostBuildEvent.bat $(PlatformToolsetVersion)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
