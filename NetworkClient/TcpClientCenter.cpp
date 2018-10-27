@@ -41,7 +41,7 @@ int TcpClientCenter::Run(bool async)
 			port = stoi(strport);
 		}
 		
-		TcpClientHandlerCenter handler_center;
+		static TcpClientHandlerCenter handler_center(ip, port, tcp_client);
 		error_code = tcp_client->RegisterHandler(&handler_center);
 
 		if (async)

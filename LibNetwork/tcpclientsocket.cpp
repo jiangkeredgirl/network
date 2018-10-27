@@ -28,6 +28,7 @@ int CTcpClientSocket::SetReconnectTime(__int64 reconnect_second)
 
 int CTcpClientSocket::Connect(const string& ip, int port)
 {
+	lock_guard<mutex> lock(m_mutex_client);
 	ip::tcp::endpoint ep(boost::asio::ip::address_v4::from_string(ip), port);
 	boost::system::error_code ec;
 	m_socket.connect(ep, ec);
@@ -49,17 +50,18 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 
 int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 {
+	lock_guard<mutex> lock(m_mutex_client);
 	ip::tcp::endpoint ep(boost::asio::ip::address_v4::from_string(ip), port);
 	m_socket.async_connect(ep, [this](boost::system::error_code ec)
 	{
-		if (m_connect_callback)
-		{
-			m_connect_callback(ec.value());
-		}
 		if (ec)
 		{
 			TraceErrorCout << "tcp client async connect error, error code:" << ec.value() << ", error message:" << ec.message();
 			m_socket.close();
+			if (m_connect_callback)
+			{
+				m_connect_callback(ec.value());
+			}
 			//Disconnect(ec.value());
 		}
 		else
@@ -67,15 +69,24 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 			TraceOKCout << "tcp client async connect success";
 			m_keep_connect = true;
 			m_sync_connect = false;
+			if (m_connect_callback)
+			{
+				m_connect_callback(ec.value());
+			}
 			ReadHeader();
 		}
 	});
+	if (m_thread_client.joinable())
+	{
+		m_thread_client.join();
+	}
 	m_thread_client = thread(bind(&CTcpClientSocket::SocketClientRunThread, this, true));
 	return 0;
 }
 
 int CTcpClientSocket::Disconnect()
 {
+	lock_guard<mutex> lock(m_mutex_client);
 	TraceInfoCout << "tcp client socket will close";
 	boost::system::error_code ec;
 	m_keep_connect = false;
@@ -126,6 +137,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 	{
 		TraceInfoCout << "async tcp client ioservice runing";
 		m_ioservice.run();
+		m_ioservice.reset();
 		TraceInfoCout << "async tcp client ioservice run over";
 	}
 	else
@@ -178,7 +190,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 	}
 	return 0;
 }
- 
+
 //void CTcpClientSocket::DisconnectHandler()
 //{
 //	m_ioservice.stop();
@@ -317,7 +329,7 @@ int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 {
 	int error_code = 1;
 	do
-	{		
+	{
 		if (ec)
 		{
 			TraceErrorCout << "tcp client write error, error code:" << ec.value() << ", error message:" << ec.message();
