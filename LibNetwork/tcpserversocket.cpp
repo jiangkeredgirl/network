@@ -98,7 +98,7 @@ void CTcpServerSocket::StartRead()
 		}
 		if (m_read_callback)
 		{
-			TraceTempCout << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
+			(TraceTempCout << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
 			m_read_callback(shared_from_this(), m_read_package->body(), readed_size, ec.value());
 		}
 
@@ -147,7 +147,7 @@ void CTcpServerSocket::DoWrite()
 			{
 				if (m_write_callback)
 				{
-					TraceTempCout << "tcp server writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:" << m_write_packages.front()->body();
+					(TraceTempCout << "tcp server writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:").write(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size);
 					m_write_callback(shared_from_this(), m_write_packages.front()->body(), m_write_packages.front()->header()->body_size, ec.value());
 				}
 				m_write_packages.pop_front();
@@ -209,7 +209,7 @@ void CTcpServerSocket::ReadBody()
 			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
 			if (m_read_callback)
 			{
-				TraceTempCout << "tcp server readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
+				(TraceTempCout << "tcp server readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
 				m_read_callback(shared_from_this(), m_read_package->body(), m_read_package->header()->body_size, ec.value());
 			}
 			ReadHeader();

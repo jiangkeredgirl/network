@@ -86,8 +86,8 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 
 int CTcpClientSocket::Disconnect()
 {
+	TrackCout;
 	lock_guard<mutex> lock(m_mutex_client);
-	TraceInfoCout << "tcp client socket will close";
 	boost::system::error_code ec;
 	m_keep_connect = false;
 	if (m_socket.is_open())
@@ -95,11 +95,9 @@ int CTcpClientSocket::Disconnect()
 		TraceInfoCout << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
 		m_socket.close(ec); // excute this statement occure crash
 	}
-	TraceInfoCout << "tcp client ioservice will stop";
 	m_ioservice.stop();
 	if (m_thread_client.joinable())
 	{
-		TraceInfoCout << "waiting SocketClientRunThread over";
 		m_thread_client.join();
 	}
 	return 0;
@@ -191,21 +189,6 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 	return 0;
 }
 
-//void CTcpClientSocket::DisconnectHandler()
-//{
-//	m_ioservice.stop();
-//	// ²»ÒªµÈÏß³Ì½áÊø»á×èÈû
-//	//if (m_thread_client.joinable())
-//	//{
-//	//	cout << "waiting SocketClientRunThread end" << endl;
-//	//	m_thread_client.join();
-//	//}
-//	if (m_disconnect_callback)
-//	{
-//		m_disconnect_callback(0);
-//	}
-//}
-
 void CTcpClientSocket::DoWrite()
 {
 	if (!m_write_packages.empty())
@@ -226,7 +209,7 @@ void CTcpClientSocket::DoWrite()
 			{
 				if (m_write_callback)
 				{
-					TraceTempCout << "tcp client writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:" << m_write_packages.front()->body();
+					(TraceTempCout << "tcp client writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:").write(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size);
 					m_write_callback(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size, ec.value());
 				}
 				m_write_packages.pop_front();
@@ -288,7 +271,7 @@ void CTcpClientSocket::ReadBody()
 			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
 			if (m_read_callback)
 			{
-				TraceTempCout << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:" << m_read_package->body();
+				(TraceTempCout << "tcp client readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
 				m_read_callback(m_read_package->body(), m_read_package->header()->body_size, ec.value());
 			}
 			ReadHeader();
@@ -352,12 +335,12 @@ int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t write
 int CTcpClientSocket::ProcessSocketError(int error_code)
 {
 	std::thread th = std::thread([this, error_code]() {
-		TraceInfoCout << "tcp client socket occur error, will close socket";
+		TraceErrorCout << "tcp client socket occur error, will close socket";
 		boost::system::error_code ec;
 		m_keep_connect = false;
 		if (m_socket.is_open())
 		{
-			TraceInfoCout << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
+			TraceErrorCout << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
 			m_socket.close(ec); // excute this statement occure crash
 		}
 		if (m_disconnect_callback)

@@ -6,7 +6,7 @@ CTcpAccept::CTcpAccept(int port)
 	m_tcpserver_handler = nullptr;
 	m_acceptor = shared_ptr<ip::tcp::acceptor>(new ip::tcp::acceptor(m_ioservice, tcp::endpoint(tcp::v4(), port)));
 	// 打印当前服务器地址  
-	TraceNoticeCout << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port();
+	TraceInfoCout << "server addr: " << m_acceptor->local_endpoint().address() << ", server port: " << m_acceptor->local_endpoint().port();
 	DisplayIP();
 }
 
@@ -43,15 +43,15 @@ int CTcpAccept::Stop()
 		item->Disconnect();
 	}
 	GetConnects().clear();
-	TraceDebugCout << "disconnect all connects";
+	TraceInfoCout << "disconnect all connects";
 	m_ioservice.stop();
 	if (m_thread_server.joinable())
 	{
-		TraceDebugCout << "waiting TcpAccepterRunThread end";
+		TraceInfoCout << "waiting TcpAccepterRunThread end";
 		m_thread_server.join();
 	}
 	m_acceptor->close();
-	TraceDebugCout << "acceptor closed";
+	TraceInfoCout << "acceptor closed";
 	return 0;
 }
 
@@ -63,6 +63,7 @@ int CTcpAccept::TcpAccepterRunThread(bool async)
 		AsyncStartAccept();
 		TraceInfoCout << "tcp server accepter runing";
 		m_ioservice.run();
+		m_ioservice.reset();
 		TraceInfoCout << "tcp server accepter run over";
 	}
 	else
