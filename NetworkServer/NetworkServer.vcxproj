@@ -188,10 +188,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="TcpServerCenter.h" />
     <ClInclude Include="TcpServerHandlerCenter.h" />
   </ItemGroup>
