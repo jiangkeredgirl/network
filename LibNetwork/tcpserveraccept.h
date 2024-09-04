@@ -1,10 +1,10 @@
 ﻿#pragma once
   
 #include "kutility.h"
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include "tcpserversocket.h"
 
-using namespace boost::asio;
+using namespace asio;
 using ip::tcp;
 
 class CTcpServerSocket;
@@ -26,7 +26,7 @@ private:
 	int TcpAccepterRunThread(bool async);
 	int StartAccept();
 	int AsyncStartAccept();
-	void AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::system::error_code error_code);
+	void AcceptHandler(shared_ptr<CTcpServerSocket> connect, asio::error_code error_code);
 	void DisplayIP();
 	shared_ptr<CTcpServerSocket> NewConnect();
 	int DeleteConnect(shared_ptr<CTcpServerSocket> connect);

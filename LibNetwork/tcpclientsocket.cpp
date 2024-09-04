@@ -1,5 +1,5 @@
 ﻿#include "tcpclientsocket.h"
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
 #include "kloglib.h"
 
 CTcpClientSocket::CTcpClientSocket() : m_ioservice(), m_socket(m_ioservice)
@@ -29,8 +29,8 @@ int CTcpClientSocket::SetReconnectTime(__int64 reconnect_second)
 int CTcpClientSocket::Connect(const string& ip, int port)
 {
 	lock_guard<mutex> lock(m_mutex_client);
-	ip::tcp::endpoint ep(boost::asio::ip::address_v4::from_string(ip), port);
-	boost::system::error_code ec;
+	ip::tcp::endpoint ep(asio::ip::address_v4::from_string(ip), port);
+	asio::error_code ec;
 	m_socket.connect(ep, ec);
 	if (ec)
 	{
@@ -43,7 +43,7 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 		TraceOKCout << "tcp client sync connect success";
 		m_keep_connect = true;
 		m_sync_connect = true;
-		m_thread_client = thread(bind(&CTcpClientSocket::SocketClientRunThread, this, false));
+		m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, false));
 	}
 	return ec.value();
 }
@@ -51,8 +51,8 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 {
 	lock_guard<mutex> lock(m_mutex_client);
-	ip::tcp::endpoint ep(boost::asio::ip::address_v4::from_string(ip), port);
-	m_socket.async_connect(ep, [this](boost::system::error_code ec)
+	ip::tcp::endpoint ep(asio::ip::address_v4::from_string(ip), port);
+	m_socket.async_connect(ep, [this](asio::error_code ec)
 	{
 		if (ec)
 		{
@@ -80,7 +80,7 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 	{
 		m_thread_client.join();
 	}
-	m_thread_client = thread(bind(&CTcpClientSocket::SocketClientRunThread, this, true));
+	m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, true));
 	return 0;
 }
 
@@ -88,7 +88,7 @@ int CTcpClientSocket::Disconnect()
 {
 	TrackCout;
 	lock_guard<mutex> lock(m_mutex_client);
-	boost::system::error_code ec;
+	asio::error_code ec;
 	m_keep_connect = false;
 	if (m_socket.is_open())
 	{
@@ -108,10 +108,10 @@ int CTcpClientSocket::Write(const char* data, size_t size)
 	int error_code = 1;
 	if (m_socket.is_open() && data && size > 0)
 	{
-		boost::system::error_code ec;
+		asio::error_code ec;
 		size_t writed_size = 0;
 		NetDataPackage write_package(data, size);
-		writed_size = boost::asio::write(m_socket, buffer(write_package.data(), size), ec);
+		writed_size = asio::write(m_socket, buffer(write_package.data(), size), ec);
 		error_code = WriteErrorCheck(ec, writed_size, size);
 	}
 	return error_code;
@@ -146,9 +146,9 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 			{
 				break;
 			}
-			boost::system::error_code ec;
+			asio::error_code ec;
 			m_read_package = shared_ptr<NetDataPackage>(new NetDataPackage());
-			size_t readed_size = boost::asio::read(m_socket, boost::asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE), ec);
+			size_t readed_size = asio::read(m_socket, asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE), ec);
 			int error_code = ReadErrorCheck(ec, readed_size, NetDataPackage::HEADER_SIZE);
 			if (error_code)
 			{
@@ -168,7 +168,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 				continue;
 			}
 
-			readed_size = boost::asio::read(m_socket, boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size), ec);
+			readed_size = asio::read(m_socket, asio::buffer(m_read_package->body(), m_read_package->header()->body_size), ec);
 			error_code = ReadErrorCheck(ec, readed_size, m_read_package->header()->body_size);
 			if (error_code)
 			{
@@ -193,9 +193,9 @@ void CTcpClientSocket::DoWrite()
 {
 	if (!m_write_packages.empty())
 	{
-		boost::asio::async_write(m_socket, boost::asio::buffer(m_write_packages.front()->data(),
+		asio::async_write(m_socket, asio::buffer(m_write_packages.front()->data(),
 			m_write_packages.front()->data_size()),
-			[this](boost::system::error_code ec, std::size_t length)
+			[this](asio::error_code ec, std::size_t length)
 		{
 			int error_code = WriteErrorCheck(ec, length, m_write_packages.front()->data_size());
 			if (error_code)
@@ -225,9 +225,9 @@ void CTcpClientSocket::DoWrite()
 void CTcpClientSocket::ReadHeader()
 {
 	m_read_package = shared_ptr<NetDataPackage>(new NetDataPackage());
-	boost::asio::async_read(m_socket,
-		boost::asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE),
-		[this](boost::system::error_code ec, std::size_t length)
+	asio::async_read(m_socket,
+		asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE),
+		[this](asio::error_code ec, std::size_t length)
 	{
 		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
 		if (error_code)
@@ -254,9 +254,9 @@ void CTcpClientSocket::ReadHeader()
 
 void CTcpClientSocket::ReadBody()
 {
-	boost::asio::async_read(m_socket,
-		boost::asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
-		[this](boost::system::error_code ec, std::size_t length)
+	asio::async_read(m_socket,
+		asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
+		[this](asio::error_code ec, std::size_t length)
 	{
 		int error_code = ReadErrorCheck(ec, length, m_read_package->header()->body_size);
 		if (error_code)
@@ -279,12 +279,12 @@ void CTcpClientSocket::ReadBody()
 	});
 }
 
-int CTcpClientSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size)
+int CTcpClientSocket::ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size)
 {
 	int error_code = 1;
 	do
 	{
-		if (ec == boost::asio::error::eof)
+		if (ec == asio::error::eof)
 		{
 			TraceErrorCout << "tcp client read eof";
 			break;
@@ -308,7 +308,7 @@ int CTcpClientSocket::ReadErrorCheck(boost::system::error_code ec, size_t readed
 	return error_code;
 }
 
-int CTcpClientSocket::WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size)
+int CTcpClientSocket::WriteErrorCheck(asio::error_code ec, size_t writed_size, size_t require_write_size)
 {
 	int error_code = 1;
 	do
@@ -336,7 +336,7 @@ int CTcpClientSocket::ProcessSocketError(int error_code)
 {
 	std::thread th = std::thread([this, error_code]() {
 		TraceErrorCout << "tcp client socket occur error, will close socket";
-		boost::system::error_code ec;
+		asio::error_code ec;
 		m_keep_connect = false;
 		if (m_socket.is_open())
 		{

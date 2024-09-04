@@ -2,10 +2,10 @@
 
 #include "kutility.h"
 #include "tcpserverhandler.h"
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include "NetDataPackage.h"
 
-using namespace boost::asio;
+using namespace asio;
 using ip::tcp;
 class CTcpServerSocket;
 
@@ -37,8 +37,8 @@ private:
 	void DoWrite();
 	void ReadHeader();
 	void ReadBody();
-	int ReadErrorCheck(boost::system::error_code ec, size_t readed_size, size_t require_read_size);
-	int WriteErrorCheck(boost::system::error_code ec, size_t writed_size, size_t require_write_size);
+	int ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size);
+	int WriteErrorCheck(asio::error_code ec, size_t writed_size, size_t require_write_size);
 	int ProcessSocketError(int error_code);
 
 private:

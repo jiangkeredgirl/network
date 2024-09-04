@@ -23,14 +23,14 @@ int CTcpAccept::RegisterHandler(ITcpServerHandler* tcpserver_handler)
 int CTcpAccept::Start()
 {
 	m_server_stop = false;
-	m_thread_server = thread(bind(&CTcpAccept::TcpAccepterRunThread, this, false));	
+	m_thread_server = std::thread(std::bind(&CTcpAccept::TcpAccepterRunThread, this, false));
 	return 0;
 }
 
 int CTcpAccept::AsyncStart()
 {
 	m_server_stop = false;
-	m_thread_server = thread(bind(&CTcpAccept::TcpAccepterRunThread, this, true));	
+	m_thread_server = std::thread(std::bind(&CTcpAccept::TcpAccepterRunThread, this, true));
 	return 0;
 }
 
@@ -98,7 +98,7 @@ int CTcpAccept::AsyncStartAccept()
 	return 0;
 }
 
-void CTcpAccept::AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::system::error_code ec)
+void CTcpAccept::AcceptHandler(shared_ptr<CTcpServerSocket> connect, asio::error_code ec)
 {
 	if (ec)
 	{
@@ -118,7 +118,7 @@ void CTcpAccept::AcceptHandler(shared_ptr<CTcpServerSocket> connect, boost::syst
 void CTcpAccept::DisplayIP()
 {
 	//tcp::resolver resolver(m_ioservice);
-	//tcp::resolver::query query(boost::asio::ip::host_name(), "");
+	//tcp::resolver::query query(asio::ip::host_name(), "");
 	//tcp::resolver::iterator iter = resolver.resolve(query);
 	//tcp::resolver::iterator end; // End marker.  
 	//while (iter != end)
@@ -126,9 +126,9 @@ void CTcpAccept::DisplayIP()
 	//	tcp::endpoint ep = *iter++;
 	//	std::cout << ep.address().to_string() << std::endl;
 	//}
-	boost::asio::io_service io_service;
+	asio::io_service io_service;
 	tcp::resolver resolver(io_service);
-	tcp::resolver::query query(boost::asio::ip::host_name(), "");
+	tcp::resolver::query query(asio::ip::host_name(), "");
 	tcp::resolver::iterator iter = resolver.resolve(query);
 	tcp::resolver::iterator end; // End marker.
 	while (iter != end)

@@ -22,32 +22,32 @@
     <ProjectGuid>{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LibNetwork</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -80,7 +80,7 @@
     <TargetName>$(ProjectName)_x$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IntDir>$(ProjectDir)bin\tempout\x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)bin\</OutDir>
-    <IncludePath>..\..\kutility\;..\..\thirdparty\boost\;..\KlogSDK\include\;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\kutility\;..\KlogSDK\include\;.\asio-1.30.2\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\thirdparty\boost\lib\msvc-$(PlatformToolsetVersion)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,7 +96,7 @@
     <TargetName>$(ProjectName)_x$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IntDir>$(ProjectDir)bin\tempout\x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <OutDir>$(ProjectDir)bin\</OutDir>
-    <IncludePath>..\..\kutility\;..\..\thirdparty\boost\;..\KlogSDK\include\;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\kutility\;..\KlogSDK\include\;.\asio-1.30.2\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\..\thirdparty\boost\lib\msvc-$(PlatformToolsetVersion)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -122,6 +122,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;BOOST_ALL_DYN_LINK;_DEBUG;_WINDOWS;_USRDLL;LIBNETWORK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/D_HAS_STD_BYTE=0 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,6 +162,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;BOOST_ALL_DYN_LINK;NDEBUG;_WINDOWS;_USRDLL;LIBNETWORK_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/D_HAS_STD_BYTE=0 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
