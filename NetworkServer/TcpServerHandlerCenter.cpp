@@ -16,7 +16,8 @@ int  TcpServerHandlerCenter::OnTcpRead(shared_ptr<ITcpConnect> connect, const ch
 {
 	if (data)
 	{
-		cout << "readed data:" << data << endl;
+		string str(data, size);
+		cout << "readed data:" << str << endl;
 	}
 	return 0;
 }
@@ -25,7 +26,8 @@ int  TcpServerHandlerCenter::OnTcpWrite(shared_ptr<ITcpConnect> connect, const c
 {
 	if (data)
 	{
-		cout << "writed data:" << data << endl;
+		string str(data, size);
+		cout << "writed data:" << str << endl;
 	}
 	return 0;
 }

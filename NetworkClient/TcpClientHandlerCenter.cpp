@@ -53,7 +53,8 @@ int TcpClientHandlerCenter::OnTcpRead(const char* data, size_t size, int status)
 {
 	if (data)
 	{
-		cout << "readed data:" << data << endl;
+		string str(data, size);
+		cout << "readed data:" << str << endl;
 	}
 	return 0;
 }
@@ -62,7 +63,8 @@ int TcpClientHandlerCenter::OnTcpWrite(const char* data, size_t size, int status
 {
 	if (data)
 	{
-		cout << "writed data:" << data << endl;
+		string str(data, size);
+		cout << "writed data:" << str << endl;
 	}
 	return 0;
 }
