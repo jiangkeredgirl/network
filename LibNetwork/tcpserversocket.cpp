@@ -26,7 +26,6 @@ int CTcpServerSocket::Write(const char* data, size_t size)
 	{
 		asio::error_code ec;
 		size_t writed_size = 0;
-		//NetDataPackage write_package(data, size);
 		writed_size = asio::write(m_socket, asio::buffer(data, size), ec);
 		error_code = WriteErrorCheck(ec, writed_size, size);
 	}
@@ -37,9 +36,6 @@ int CTcpServerSocket::AsyncWrite(const char* data, size_t size)
 {
 	if (m_socket.is_open() && data && size > 0)
 	{
-		//shared_ptr<NetDataPackage> write_package = shared_ptr<NetDataPackage>(new NetDataPackage(data, size));
-		//m_write_packages.push_back(write_package);
-		//DoWrite();
 		auto write_buffer = std::make_shared<std::vector<char>>(data, data + size);  // 使用智能指针管理缓冲区
 		asio::async_write(m_socket, asio::buffer(*write_buffer),
 			[this, write_buffer, size](asio::error_code ec, std::size_t bytes_transferred)
@@ -168,98 +164,6 @@ void CTcpServerSocket::AsyncRead()
 			}
 		});
 }
-
-#if 0
-void CTcpServerSocket::DoWrite()
-{
-	if (!m_write_packages.empty())
-	{
-		asio::async_write(m_socket, asio::buffer(m_write_packages.front()->data(),
-			m_write_packages.front()->data_size()),
-			[this](asio::error_code ec, std::size_t length)
-		{
-			int error_code = WriteErrorCheck(ec, length, m_write_packages.front()->data_size());
-			if (error_code)
-			{
-				if (m_write_callback)
-				{
-					m_write_callback(shared_from_this(), nullptr, 0, error_code);
-				}
-			}
-			else
-			{
-				if (m_write_callback)
-				{
-					(TraceTempCout << "tcp server writed payload data size=" << m_write_packages.front()->header()->body_size << ", payload data:").write(m_write_packages.front()->body(), m_write_packages.front()->header()->body_size);
-					m_write_callback(shared_from_this(), m_write_packages.front()->body(), m_write_packages.front()->header()->body_size, ec.value());
-				}
-				m_write_packages.pop_front();
-				if (!m_write_packages.empty())
-				{
-					DoWrite();
-				}
-			}
-		});
-	}
-}
-
-void CTcpServerSocket::ReadHeader()
-{
-	m_read_package = shared_ptr<NetDataPackage>(new NetDataPackage());
-	asio::async_read(m_socket,
-		asio::buffer(m_read_package->header(), NetDataPackage::HEADER_SIZE),
-		[this](asio::error_code ec, std::size_t length)
-	{
-		int error_code = ReadErrorCheck(ec, length, NetDataPackage::HEADER_SIZE);
-		if (error_code)
-		{
-			if (m_read_callback)
-			{
-				m_read_callback(shared_from_this(), nullptr, 0, error_code);
-			}
-		}
-		else if (m_read_package->decode_header())
-		{
-			TraceErrorCout << "tcp server decode header error";
-			if (m_read_callback)
-			{
-				m_read_callback(shared_from_this(), nullptr, 0, error_code);
-			}
-		}
-		else
-		{
-			ReadBody();
-		}
-	});
-}
-
-void CTcpServerSocket::ReadBody()
-{
-	asio::async_read(m_socket,
-		asio::buffer(m_read_package->body(), m_read_package->header()->body_size),
-		[this](asio::error_code ec, std::size_t length)
-	{
-		int error_code = ReadErrorCheck(ec, length, m_read_package->header()->body_size);
-		if (error_code)
-		{
-			if (m_read_callback)
-			{
-				m_read_callback(shared_from_this(), nullptr, 0, error_code);
-			}
-		}
-		else
-		{
-			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
-			if (m_read_callback)
-			{
-				(TraceTempCout << "tcp server readed payload data size=" << m_read_package->header()->body_size << ", payload data:").write(m_read_package->body(), m_read_package->header()->body_size);
-				m_read_callback(shared_from_this(), m_read_package->body(), m_read_package->header()->body_size, ec.value());
-			}
-			ReadHeader();
-		}
-	});
-}
-#endif
 
 int CTcpServerSocket::ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size)
 {

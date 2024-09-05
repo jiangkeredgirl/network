@@ -36,11 +36,6 @@ public:
 private:
 	void Read();
 	void AsyncRead();
-#if 0
-	void DoWrite();
-	void ReadHeader();
-	void ReadBody();
-#endif
 	int ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size);
 	int WriteErrorCheck(asio::error_code ec, size_t writed_size, size_t require_write_size);
 	int ProcessSocketError(int error_code);
@@ -50,10 +45,6 @@ private:
 	//enum { MAXBUFFER = 1024 };
 	//char m_readbuffer[MAXBUFFER];
 	//char m_writebuffer[MAXBUFFER];
-#if 0
-	shared_ptr<NetDataPackage> m_read_package;
-	list<shared_ptr<NetDataPackage>> m_write_packages;
-#endif
 	f_connect          m_connect_callback;
 	f_disconnect       m_disconnect_callback;
 	f_read             m_read_callback;
