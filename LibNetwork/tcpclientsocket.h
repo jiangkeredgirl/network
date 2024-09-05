@@ -29,10 +29,11 @@ public:
 	int AsyncWrite(const char* data, size_t size);
 
 private:
+	void Read();
+	void AsyncRead();
 	int  SocketClientRunThread(bool async);
 	void DoWrite();	
-	void ReadHeader();
-	void ReadBody();
+	void ReadHeader();		
 	int ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size);
 	int WriteErrorCheck(asio::error_code ec, size_t writed_size, size_t require_write_size);
 	int ProcessSocketError(int error_code);
