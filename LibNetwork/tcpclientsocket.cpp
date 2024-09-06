@@ -6,7 +6,6 @@ CTcpClientSocket::CTcpClientSocket() : m_ioservice(), m_socket(m_ioservice)
 {
 }
 
-
 CTcpClientSocket::~CTcpClientSocket()
 {
 }
@@ -109,9 +108,7 @@ int CTcpClientSocket::Write(const char* data, size_t size)
 	if (m_socket.is_open() && data && size > 0)
 	{
 		asio::error_code ec;
-		size_t writed_size = 0;
-		//NetDataPackage write_package(data, size);
-		writed_size = asio::write(m_socket, asio::buffer(data, size), ec);
+		size_t writed_size = asio::write(m_socket, asio::buffer(data, size), ec);
 		error_code = WriteErrorCheck(ec, writed_size, size);
 	}
 	return error_code;
@@ -153,7 +150,6 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 	{
 		TraceInfoCout << "async tcp client ioservice runing";
 		m_ioservice.run();
-		//m_ioservice.reset();
 		TraceInfoCout << "async tcp client ioservice run over";
 	}
 	else
@@ -173,10 +169,9 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 void CTcpClientSocket::Read()
 {
 	asio::error_code ec;
-	//m_read_package = shared_ptr<NetDataPackage>(new NetDataPackage());
-	asio::streambuf read_buffer;
-	size_t readed_size = asio::read(m_socket, read_buffer, ec);
-	int error_code = ReadErrorCheck(ec, readed_size, readed_size);
+	auto read_buffer   = std::make_shared<std::vector<char>>(1024);  // 使用智能指针管理缓冲区
+	size_t readed_size = m_socket.read_some(asio::buffer(*read_buffer), ec);
+	int error_code     = ReadErrorCheck(ec, readed_size, readed_size);
 	if (error_code)
 	{
 		if (m_read_callback)
@@ -186,21 +181,19 @@ void CTcpClientSocket::Read()
 	}
 	else if (m_read_callback)
 	{
-		// 获取缓冲区中的数据
-		std::istream is(&read_buffer);
-		std::string data;
-		is >> data;
-		std::cout << "Received: " << data << std::endl;
-		(TraceTempCout << "tcp client readed payload data size=" << readed_size << ", payload data:").write(data.c_str(), data.size());
-		m_read_callback(data.c_str(), data.size(), ec.value());
+		// 获取缓冲区中的数据			
+		std::string read_data(read_buffer->data(), read_buffer->size());
+		//std::cout << "Received: " << read_data << std::endl;
+		(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+		(TraceTempCout << "tcp client readed payload data size=" << readed_size << ", payload data:").write(read_data.c_str(), read_data.size());
+		m_read_callback(read_data.c_str(), read_data.size(), ec.value());
 	}
 }
 
 void CTcpClientSocket::AsyncRead()
 {
-	auto read_buffer = std::make_shared<asio::streambuf>();  // 使用智能指针管理缓冲区
-	asio::async_read(m_socket, *read_buffer,
-		[this, read_buffer](asio::error_code ec, std::size_t bytes_transferred)
+	auto read_buffer = std::make_shared<std::vector<char>>(1024);  // 使用智能指针管理缓冲区
+	m_socket.async_read_some(asio::buffer(*read_buffer), [this, read_buffer](asio::error_code ec, std::size_t bytes_transferred)
 	{
 		int error_code = ReadErrorCheck(ec, bytes_transferred, bytes_transferred);
 		if (error_code)
@@ -212,16 +205,13 @@ void CTcpClientSocket::AsyncRead()
 		}
 		else
 		{
-			//std::cout.write(m_read_package->body(), m_read_package->header()->body_size);
 			if (m_read_callback)
 			{
-				// 获取缓冲区中的数据
-				std::istream is(&(*read_buffer));
-				std::string data;
-				is >> data;
-				std::cout << "Received: " << data << std::endl;
-				(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(data.c_str(), data.size());
-				m_read_callback(data.c_str(), data.size(), ec.value());
+				// 获取缓冲区中的数据					
+				std::string read_data(read_buffer->data(), read_buffer->size());
+				(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+				(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
+				m_read_callback(read_data.c_str(), read_data.size(), ec.value());
 			}
 			AsyncRead();
 		}
