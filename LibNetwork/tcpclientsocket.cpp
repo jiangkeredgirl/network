@@ -42,6 +42,10 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 		TraceOKCout << "tcp client sync connect success";
 		m_keep_connect = true;
 		m_sync_connect = false;
+		if (m_thread_client.joinable())
+		{
+			m_thread_client.join();
+		}
 		m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, false));
 	}
 	return ec.value();
@@ -145,11 +149,13 @@ int CTcpClientSocket::AsyncWrite(const char* data, size_t size)
 
 int CTcpClientSocket::SocketClientRunThread(bool async)
 {
+	//TraceInfoCout << "tcp client thread runing";
 	TrackCout;
 	if (async)
 	{
 		TraceInfoCout << "async tcp client ioservice runing";
 		m_ioservice.run();
+		m_ioservice.reset();
 		TraceInfoCout << "async tcp client ioservice run over";
 	}
 	else
@@ -163,6 +169,7 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 			Read();
 		}
 	}
+	//TraceInfoCout << "tcp client thread over";
 	return 0;
 }
 
