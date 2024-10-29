@@ -154,6 +154,8 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 	if (async)
 	{
 		TraceInfoCout << "async tcp client ioservice runing";
+		m_ioservice.reset();
+		m_ioservice.restart();
 		m_ioservice.run();
 		m_ioservice.reset();
 		TraceInfoCout << "async tcp client ioservice run over";
@@ -191,7 +193,7 @@ void CTcpClientSocket::Read()
 		// 获取缓冲区中的数据			
 		std::string read_data(read_buffer->data(), bytes_transferred);
 		//std::cout << "Received: " << read_data << std::endl;
-		(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+		//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
 		(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 		m_read_callback(read_data.c_str(), read_data.size(), ec.value());
 	}
@@ -216,7 +218,7 @@ void CTcpClientSocket::AsyncRead()
 			{
 				// 获取缓冲区中的数据					
 				std::string read_data(read_buffer->data(), bytes_transferred);
-				(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+				//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
 				(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 				m_read_callback(read_data.c_str(), read_data.size(), ec.value());
 			}

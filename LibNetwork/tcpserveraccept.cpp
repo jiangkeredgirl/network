@@ -62,6 +62,8 @@ int CTcpAccept::TcpAccepterRunThread(bool async)
 	{
 		AsyncStartAccept();
 		TraceInfoCout << "tcp server accepter runing";
+		m_ioservice.reset();
+		m_ioservice.restart();
 		m_ioservice.run();
 		m_ioservice.reset();
 		TraceInfoCout << "tcp server accepter run over";
