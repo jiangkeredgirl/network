@@ -94,8 +94,17 @@ int CTcpClientSocket::Disconnect()
 	asio::error_code ec;
 	m_keep_connect = false;
 	if (m_socket.is_open())
-	{
-		TraceInfoCout << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
+	{		
+		try {
+			asio::ip::tcp::endpoint remote_ep = m_socket.remote_endpoint();
+			asio::ip::address remote_address = remote_ep.address();
+			std::cout << "Remote address: " << remote_address.to_string() << std::endl;
+			TraceInfoCout << "tcp client close socket, server ip:" << m_socket.remote_endpoint().address().to_string();
+		}
+		catch (const asio::system_error& e) 
+		{
+			std::cerr << "Error: " << e.what() << std::endl;
+		}
 		m_socket.close(ec); // excute this statement occure crash
 	}
 	m_ioservice.stop();
