@@ -27,6 +27,7 @@ int CTcpClientSocket::SetReconnectTime(__int64 reconnect_second)
 
 int CTcpClientSocket::Connect(const string& ip, int port)
 {
+	TrackCout;
 	lock_guard<mutex> lock(m_mutex_client);
 	ip::tcp::endpoint ep(asio::ip::address_v4::from_string(ip), port);
 	asio::error_code ec;
@@ -53,10 +54,12 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 
 int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 {
+	TrackCout;
 	lock_guard<mutex> lock(m_mutex_client);
 	ip::tcp::endpoint ep(asio::ip::address_v4::from_string(ip), port);
 	m_socket.async_connect(ep, [this](asio::error_code ec)
 	{
+		TrackCout;
 		if (ec)
 		{
 			TraceErrorCout << "tcp client async connect error, error code:" << ec.value() << ", error message:" << ec.message();
@@ -291,6 +294,7 @@ int CTcpClientSocket::WriteErrorCheck(asio::error_code ec, size_t writed_size, s
 
 int CTcpClientSocket::ProcessSocketError(int error_code)
 {
+	TrackCout;
 	std::thread th = std::thread([this, error_code]() {
 		TraceErrorCout << "tcp client socket occur error, will close socket";
 		asio::error_code ec;
