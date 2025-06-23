@@ -136,7 +136,7 @@ void CTcpAccept::DisplayIP()
 	while (iter != end)
 	{
 		tcp::endpoint ep = *iter++;
-		TraceInfoCout << "ip:" << ep.address().to_string() << ", port:" << ep.port();
+		TraceInfoCout << "protocol: " << (ep.protocol() == asio::ip::tcp::v4() ? "IPv4" : "IPv6") << ", ip:" << ep.address().to_string() << ", port:" << ep.port();
 	}
 }
 
