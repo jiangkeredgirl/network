@@ -176,6 +176,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="KSerialPort.h" />
     <ClInclude Include="NetDataPackage.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />

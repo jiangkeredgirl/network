@@ -48,6 +48,9 @@
     <ClInclude Include="TcpPackage.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="KSerialPort.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tcpclientsocket.cpp">

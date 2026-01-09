@@ -16,7 +16,7 @@
 typedef string any_type;
 typedef std::function<void(const std::vector<std::byte>& bytes)> ReadBytesFunction;
 typedef std::function<void(const std::string& hexstr)> ReadHexStrFunction;
-typedef std::function<void(int error_code)> SerialErrorFunction;
+typedef std::function<void(int error_code, string error_msg)> SerialErrorFunction;
 
 class KSerialPort
 {
@@ -196,14 +196,43 @@ private:
                 error_code = 1;
                 std::cerr << "write_some fail" << endl;
                 //LOG_ERROR("write_some fail");
+                if (m_error_callback)
+                {
+                    m_error_callback(m_ec.value(), m_ec.message());
+                }
                 break;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }while(1);
         //std::this_thread::sleep_for(std::chrono::milliseconds(30));
         return error_code;
     }
 
+    //async Write some data to port
+    void asyncWrite(const std::vector<std::byte>& bytes)
+    {
+        m_serial->async_write_some(asio::buffer(static_cast<const void*>(bytes.data()), bytes.size()), std::bind(&KSerialPort::writeCallback, this, std::placeholders::_1, std::placeholders::_2));
+    }
+
+    //The asyanc callback function of asyanc_write
+    void writeCallback(asio::error_code ec, std::size_t written)
+    {
+        std::cout << "\nhandle_write: ";
+        if (ec)
+        {
+            std::cerr << "Error on write: " << ec.message() << std::endl;
+            if (m_error_callback)
+            {
+                m_error_callback(ec.value(), ec.message());
+            }
+        }
+        else if (!ec)
+        {
+            std::cout << "Written bytes: " << written << std::endl;
+        }
+    }
+
+ private:
     int waitRead(std::vector<std::byte>& bytes, int timeoutMsec)
     {
         int error_code = 0;
@@ -244,7 +273,7 @@ private:
             error_code = 1;
             if(m_error_callback)
             {
-                m_error_callback(m_ec.value());
+                m_error_callback(m_ec.value(), m_ec.message());
             }
         }
         else
@@ -293,7 +322,7 @@ private:
             std::cerr << "Error on receive: " << ec.message() << std::endl;
             if(m_error_callback)
             {
-                m_error_callback(ec.value());
+                m_error_callback(ec.value(), ec.message());
             }
         }
         else
