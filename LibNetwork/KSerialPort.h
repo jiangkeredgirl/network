@@ -136,14 +136,33 @@ public:
 
     int writeHexStr( const string& wirte_hexstr, string& read_hexstr, int timeoutMsec = 100 )
     {
-        m_is_read_wait = true;
-        std::vector<std::byte> bytes = HexStringToBytes(wirte_hexstr);
-        int error_code = write(bytes);
-        if(error_code == 0)
+        int error_code = 1;
+        int try_count = 3;
+        do
         {
+            m_is_read_wait = true;
+            std::vector<std::byte> bytes = HexStringToBytes(wirte_hexstr);
+            error_code = write(bytes);
+            if(error_code)
+            {
+                continue;
+            }
             error_code = waitReadHexStr(read_hexstr, timeoutMsec);
-        }
-        m_is_read_wait = false;
+            if(error_code)
+            {
+                continue;
+            }
+            if(read_hexstr.empty())
+            {
+                error_code = 1;
+                continue;
+            }
+            m_is_read_wait = false;
+            if(error_code == 0)
+            {
+                break;
+            }
+        }while(try_count-- > 0);
         return error_code;
     }
 
@@ -236,20 +255,35 @@ private:
     int waitRead(std::vector<std::byte>& bytes, int timeoutMsec)
     {
         int error_code = 0;
-        std::cv_status status;
-        unique_lock<mutex> lock(m_read_wait_mutex);
-        status = m_read_wait_condition.wait_for(lock, std::chrono::milliseconds(timeoutMsec));
-        if (status == std::cv_status::no_timeout)
+        int try_count = 3;
+        do
         {
-            printf("waitRread completed\n");
-            bytes = m_readed_bytes;
-            error_code = 0;
+            std::cv_status status;
+            unique_lock<mutex> lock(m_read_wait_mutex);
+            status = m_read_wait_condition.wait_for(lock, std::chrono::milliseconds(timeoutMsec));
+            if (status == std::cv_status::no_timeout)
+            {
+                std::cout << "waitRread completed" << std::endl;
+                if(m_readed_bytes.empty())
+                {
+                    std::cerr << "Error on read, readed bytes is 0 " << std::endl;
+                    error_code = 1;
+                }
+                else
+                {
+                    std::cout << "Success on read, readed bytes is " << m_readed_bytes.size() << std::endl;
+                    bytes = m_readed_bytes;
+                    error_code = 0;
+                    break;
+                }
+            }
+            else if (status == std::cv_status::timeout)
+            {
+                std::cerr << "waitRread timeout" << std::endl;
+                error_code = 1;
+            }
         }
-        else if (status == std::cv_status::timeout)
-        {
-            printf("waitRread timeout\n");
-            error_code = 1;
-        }
+        while(try_count-- > 0);
         return error_code;
     }
 
