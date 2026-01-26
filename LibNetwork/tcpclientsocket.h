@@ -27,6 +27,8 @@ public:
 	int Disconnect();
 	int Write(const char* data, size_t size);
 	int AsyncWrite(const char* data, size_t size);
+	int GetLocalIPandPort(string& ip, int& port);
+	int GetRemoteIPandPort(string& ip, int& port);
 
 private:
 	void Read();
@@ -35,6 +37,7 @@ private:
 	int ReadErrorCheck(asio::error_code ec, size_t readed_size, size_t require_read_size);
 	int WriteErrorCheck(asio::error_code ec, size_t writed_size, size_t require_write_size);
 	int ProcessSocketError(int error_code);
+	int PrintLocalRemoteConnectionInfo();
 	//int Reconnect();
 	//int DoConnect();
 
@@ -57,5 +60,9 @@ private:
 	__int64 m_reconnect_second = 0;
 	bool m_keep_connect = false;
 	bool m_sync_connect = false;
+	string m_local_ip;
+	int    m_local_port = 0;
+	string m_remote_ip;
+	int    m_remote_port = 0;
 };
 

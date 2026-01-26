@@ -41,6 +41,7 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 	else
 	{
 		TraceOKCout << "tcp client sync connect success";
+		PrintLocalRemoteConnectionInfo();
 		m_keep_connect = true;
 		m_sync_connect = false;
 		if (m_thread_client.joinable())
@@ -73,6 +74,7 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 		else
 		{
 			TraceOKCout << "tcp client async connect success";
+			PrintLocalRemoteConnectionInfo();
 			m_keep_connect = true;
 			m_sync_connect = true;
 			if (m_connect_callback)
@@ -156,6 +158,20 @@ int CTcpClientSocket::AsyncWrite(const char* data, size_t size)
 				}
 			});
 	}
+	return 0;
+}
+
+int CTcpClientSocket::GetLocalIPandPort(string& ip, int& port)
+{
+	ip   = m_local_ip;
+	port = m_local_port;
+	return 0;
+}
+
+int CTcpClientSocket::GetRemoteIPandPort(string& ip, int& port)
+{
+	ip = m_remote_ip;
+	port = m_remote_port;
 	return 0;
 }
 
@@ -310,5 +326,36 @@ int CTcpClientSocket::ProcessSocketError(int error_code)
 		}
 	});
 	th.detach();
+	return 0;
+}
+
+int CTcpClientSocket::PrintLocalRemoteConnectionInfo()
+{
+	if (m_socket.is_open())
+	{
+		try
+		{
+			std::cout << "\n=== 连接信息 ===" << std::endl;
+			// 获取本地端点
+			tcp::endpoint local_ep = m_socket.local_endpoint();
+			// 获取远程端点
+			tcp::endpoint remote_ep = m_socket.remote_endpoint();
+			std::cout << "本地端点: " << local_ep.address().to_string() << ":" << local_ep.port() << std::endl;
+			std::cout << "远程端点: " << remote_ep.address().to_string() << ":" << remote_ep.port() << std::endl;
+			m_local_ip    = local_ep.address().to_string();
+			m_local_port  = local_ep.port();
+			m_remote_ip   = remote_ep.address().to_string();
+			m_remote_port = remote_ep.port();
+
+		}
+		catch (const asio::system_error& e)
+		{
+			std::cerr << "获取端点信息失败: " << e.what() << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << "Socket未连接" << std::endl;
+	}
 	return 0;
 }

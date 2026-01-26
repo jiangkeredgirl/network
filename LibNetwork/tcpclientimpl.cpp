@@ -62,6 +62,17 @@ int CTcpClientImpl::AsyncTcpWrite(const char* data, size_t size)
 	return m_tcp_client_socket.AsyncWrite(data, size);
 }
  
+int CTcpClientImpl::GetLocalIPandPort(string& ip, int& port)
+{
+	return m_tcp_client_socket.GetLocalIPandPort(ip, port);
+}
+
+int CTcpClientImpl::GetRemoteIPandPort(string& ip, int& port)
+{
+	return m_tcp_client_socket.GetRemoteIPandPort(ip, port);
+}
+
+
 
 LIBNETWORK_API ITcpClient* NewTcpClient(void)
 {

@@ -18,6 +18,8 @@ public:
 	virtual int TcpDisconnect() override;
 	virtual int TcpWrite(const char* data, size_t size) override;
 	virtual int AsyncTcpWrite(const char* data, size_t size) override;
+	virtual int GetLocalIPandPort(string& ip, int& port) override;
+	virtual int GetRemoteIPandPort(string& ip, int& port) override;
 
 
 private:
