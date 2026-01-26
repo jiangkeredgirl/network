@@ -123,7 +123,7 @@ void CTcpServerSocket::Read()
 		// 获取缓冲区中的数据
 		std::string read_data(read_buffer->data(), bytes_transferred);
 		//std::cout << "Received: " << read_data << std::endl;
-		(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+		//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
 		(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 		m_read_callback(shared_from_this(), read_data.c_str(), read_data.size(), ec.value());
 	}
@@ -149,7 +149,7 @@ void CTcpServerSocket::AsyncRead()
 					// 获取缓冲区中的数据
 					std::string read_data(read_buffer->data(), bytes_transferred);
 					//std::cout << "Received: " << read_data << std::endl;
-					(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
+					//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
 					(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 					m_read_callback(shared_from_this(), read_data.c_str(), read_data.size(), ec.value());
 				}
