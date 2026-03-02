@@ -64,5 +64,7 @@ private:
 	int    m_local_port = 0;
 	string m_remote_ip;
 	int    m_remote_port = 0;
+	std::atomic<bool> m_running = false;
+
 };
 

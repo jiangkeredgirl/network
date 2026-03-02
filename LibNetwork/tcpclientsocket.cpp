@@ -44,11 +44,15 @@ int CTcpClientSocket::Connect(const string& ip, int port)
 		PrintLocalRemoteConnectionInfo();
 		m_keep_connect = true;
 		m_sync_connect = false;
-		if (m_thread_client.joinable())
+		if (!m_running)
 		{
-			m_thread_client.join();
+			if (m_thread_client.joinable())
+			{
+				m_thread_client.join();
+			}
+			m_running = true;
+			m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, false));
 		}
-		m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, false));
 	}
 	return ec.value();
 }
@@ -64,12 +68,15 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 		if (ec)
 		{
 			TraceErrorCout << "tcp client async connect error, error code:" << ec.value() << ", error message:" << ec.message();
-			m_socket.close();
-			if (m_connect_callback)
+			if (ec != asio::error::already_connected)
 			{
-				m_connect_callback(ec.value());
+				m_socket.close();
+				if (m_connect_callback)
+				{
+					m_connect_callback(ec.value());
+				}
+				//Disconnect(ec.value());
 			}
-			//Disconnect(ec.value());
 		}
 		else
 		{
@@ -84,11 +91,15 @@ int CTcpClientSocket::AsyncConnect(const string& ip, int port)
 			AsyncRead();
 		}
 	});
-	if (m_thread_client.joinable())
+	if (!m_running)
 	{
-		m_thread_client.join();
+		if (m_thread_client.joinable())
+		{
+			m_thread_client.join();
+		}
+		m_running = true;
+		m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, true));
 	}
-	m_thread_client = std::thread(std::bind(&CTcpClientSocket::SocketClientRunThread, this, true));
 	return 0;
 }
 
@@ -177,8 +188,9 @@ int CTcpClientSocket::GetRemoteIPandPort(string& ip, int& port)
 
 int CTcpClientSocket::SocketClientRunThread(bool async)
 {
-	//TraceInfoCout << "tcp client thread runing";
 	TrackCout;
+	TraceInfoCout << "tcp client thread runing";
+	m_running = true;
 	if (async)
 	{
 		TraceInfoCout << "async tcp client ioservice runing";
@@ -199,7 +211,8 @@ int CTcpClientSocket::SocketClientRunThread(bool async)
 			Read();
 		}
 	}
-	//TraceInfoCout << "tcp client thread over";
+	m_running = false;
+	TraceInfoCout << "tcp client thread over";
 	return 0;
 }
 
@@ -265,6 +278,12 @@ int CTcpClientSocket::ReadErrorCheck(asio::error_code ec, size_t readed_size, si
 			TraceErrorCout << "tcp client read eof";
 			break;
 		}
+		if (ec == asio::error::connection_aborted)
+		{
+			TraceWarningCout << "tcp client read error, error code:" << ec.value() << ", error message:" << ec.message();
+			error_code = 0;
+			break;
+		}
 		if (ec)
 		{
 			TraceErrorCout << "tcp client read error, error code:" << ec.value() << ", error message:" << ec.message();
@@ -289,6 +308,12 @@ int CTcpClientSocket::WriteErrorCheck(asio::error_code ec, size_t writed_size, s
 	int error_code = 1;
 	do
 	{
+		if (ec == asio::error::connection_aborted)
+		{
+			TraceWarningCout << "tcp client read error, error code:" << ec.value() << ", error message:" << ec.message();
+			error_code = 0;
+			break;
+		}
 		if (ec)
 		{
 			TraceErrorCout << "tcp client write error, error code:" << ec.value() << ", error message:" << ec.message();
