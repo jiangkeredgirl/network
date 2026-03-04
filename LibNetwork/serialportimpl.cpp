@@ -226,6 +226,7 @@ void CSerialPortImpl::HandleFrame(const vector<char>& frame)
     if (frame.empty())
         return;
 
+    // 打印调试
     cout << "[Serial] Frame Received, size=" << frame.size() << ", data=";
     for (auto b : frame) cout << hex << (int)(uint8_t)b << " ";
     cout << dec << endl;
@@ -245,11 +246,10 @@ void CSerialPortImpl::HandleFrame(const vector<char>& frame)
         }
     }
 
-    // 尝试匹配请求-响应
+    // 请求-响应匹配
     if (frame.size() >= 3) // 至少要有ID和内容
     {
         uint16_t id = *(uint16_t*)&frame[1]; // 假设ID在 [1,2] 位置
-
         auto it = pending_requests_.find(id);
         if (it != pending_requests_.end())
         {

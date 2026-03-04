@@ -91,6 +91,10 @@ int SerialPortCenter::Run(bool async)
 			else
 			{
 				serialport_client->Write(input_flag.c_str(), input_flag.size());
+				char** response_data = nullptr;
+				size_t response_data_size = 0;
+				int timeout_ms = 100000;
+				serialport_client->Write(input_flag.c_str(), input_flag.size(), response_data, response_data_size, timeout_ms);
 			}
 		}
 	} while (true);
