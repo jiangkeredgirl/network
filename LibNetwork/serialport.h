@@ -5,33 +5,23 @@
 #define LIBSERIALPORT_API __declspec(dllimport)
 #endif
 
-#include <string>
-#include <cstddef>
-#include <codecvt>
-#include <functional>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-using namespace std;
-
-
-typedef string any_type;
-typedef std::function<void(const std::vector<std::byte>& bytes)> ReadBytesFunction;
-typedef std::function<void(const std::string& hexstr)>               ReadHexStrFunction;
-typedef std::function<void(int error_code, std::string error_msg)>   SerialErrorFunction;
+#include "serialporthandler.h"
 
 class ISerialPort
 {
-
 public:
-	virtual int RegisterHandler(ReadBytesFunction read_byte_callback, ReadHexStrFunction read_hex_callback, SerialErrorFunction error_callback) = 0;
-	virtual int Connect(const any_type& port) = 0;
-	virtual int Disconnect() = 0;
-	virtual int WriteHexStr(const string& wirte_hexstr) = 0;
-	virtual int WriteHexStr(const string& wirte_hexstr, string& read_hexstr, int timeout_msec = 1000) = 0;
+	virtual int RegisterHandler(ISerialPortHandler* serialport_handler) = 0;       // 注册串口事件
+	virtual int Connect(const string& portname, int baudrate = 115200) = 0;        // 连接串口
+	virtual int AsyncConnect(const string& portname, int baudrate = 115200) = 0;   // 异步连接串口
+	virtual int Disconnect() = 0;                                                  // 断开串口
+	virtual int Write(const char* data, size_t size) = 0;                          // 同步写入串口数据
+	virtual int Write(const char* data, size_t size, char** response_data, size_t& response_data_size, int timeout_ms) = 0; // 同步写入串口数据，并返回读取的数据,设置返回数据超时
+	virtual int AsyncWrite(const char* data, size_t size) = 0;                     // 异步写入串口数据
+
+	virtual ~ISerialPort() {}
 };
+
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,3 +35,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+

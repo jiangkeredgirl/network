@@ -178,6 +178,7 @@
   <ItemGroup>
     <ClInclude Include="NetDataPackage.h" />
     <ClInclude Include="serialport.h" />
+    <ClInclude Include="serialporthandler.h" />
     <ClInclude Include="serialportimpl.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />

@@ -1,6 +1,5 @@
 ﻿#include "TcpPackage.h"
 #include "cstandard.h"
-#include "serialport.h"
 #include "TcpClientCenter.h"
 #include "TcpClientHandlerCenter.h"
 
@@ -19,12 +18,6 @@ TcpClientCenter& TcpClientCenter::instance()
 {
 	static TcpClientCenter _instance;
 	return _instance;
-}
-
-int TcpClientCenter::TestSerialPort()
-{
-	ISerialPort* serial_port = NewSerialPort();
-	serial_port->Connect("com1");
 }
 
 int TcpClientCenter::Run(bool async)

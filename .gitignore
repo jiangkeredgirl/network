@@ -27,3 +27,4 @@ OutBinOfSln
 /LibNetworkServer/*.filters
 /NetworkServer/*.filters
 /NetworkServer/*.user
+x64

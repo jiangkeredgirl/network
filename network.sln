@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibNetwork", "LibNetwork\LibNetwork.vcxproj", "{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}"
 EndProject
@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkClient", "NetworkCli
 	ProjectSection(ProjectDependencies) = postProject
 		{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED} = {86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SerialPortClient", "SerialPortClient\SerialPortClient.vcxproj", "{80581D89-3ED4-4173-BC27-7E2ADC340004}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +49,14 @@ Global
 		{518010AA-9729-41D3-97EF-DBAA2052CC25}.Release|Win32.Build.0 = Release|Win32
 		{518010AA-9729-41D3-97EF-DBAA2052CC25}.Release|x64.ActiveCfg = Release|x64
 		{518010AA-9729-41D3-97EF-DBAA2052CC25}.Release|x64.Build.0 = Release|x64
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Debug|Win32.ActiveCfg = Debug|Win32
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Debug|Win32.Build.0 = Debug|Win32
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Debug|x64.ActiveCfg = Debug|x64
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Debug|x64.Build.0 = Debug|x64
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Release|Win32.ActiveCfg = Release|Win32
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Release|Win32.Build.0 = Release|Win32
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Release|x64.ActiveCfg = Release|x64
+		{80581D89-3ED4-4173-BC27-7E2ADC340004}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
