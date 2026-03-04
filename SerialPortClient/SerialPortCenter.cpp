@@ -27,15 +27,15 @@ int SerialPortCenter::Run(bool async)
 	ISerialPort* serialport_client = NewSerialPort();
 	do
 	{
-		cout << "please input com number, such as:1，2，3" << endl;
+		cout << "please input com number, defualt 4，such as:1、2、3" << endl;
 		string com_num;
 		getline(std::cin, com_num);
-		cout << "input baud rate, such as:9600,115200" << endl;
+		cout << "input baud rate, defualt 115200，such as:9600、115200" << endl;
 		string baudrate;
 		getline(std::cin, baudrate);
 		if (com_num.empty())
 		{
-			com_num = "COM1";
+			com_num = "COM4";
 		}
 		else
 		{
@@ -76,7 +76,7 @@ int SerialPortCenter::Run(bool async)
 	string input_flag;
 	do
 	{
-		cout << "please text for sending to server, \'c\' close connect\n" << endl;
+		cout << "please text for writing to serialport, \'c\' close connect\n" << endl;
 		cin >> input_flag;
 		if (input_flag == "c")
 		{

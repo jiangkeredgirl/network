@@ -17,6 +17,7 @@ public:
 	virtual int Write(const char* data, size_t size) = 0;                          // 同步写入串口数据
 	virtual int Write(const char* data, size_t size, char** response_data, size_t& response_data_size, int timeout_ms) = 0; // 同步写入串口数据，并返回读取的数据,设置返回数据超时
 	virtual int AsyncWrite(const char* data, size_t size) = 0;                     // 异步写入串口数据
+	virtual bool IsConnected() const = 0;                                          // 连接状态
 
 	virtual ~ISerialPort() {}
 };

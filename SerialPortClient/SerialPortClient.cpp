@@ -19,24 +19,29 @@
 //   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
 //   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
 
+#include <windows.h>
 #include "SerialPortCenter.h"
 #include <stdio.h>
 #include <tchar.h>
 #include "cstandard.h"
 using namespace std;
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
-	cout << "please input client type, defualt async, s indicate sync" << endl;
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+	cout << "输出中文测试" << endl;
+
+	cout << "please input client type, defualt sync, a indicate async" << endl;
 	string client_type;
 	getline(std::cin, client_type);
-	if (client_type == "s")
+	if (client_type == "a")
 	{
-		SerialPortCenter::instance().Run(false);
+		SerialPortCenter::instance().Run(true);
 	}
 	else
 	{
-		SerialPortCenter::instance().Run(true);
+		SerialPortCenter::instance().Run(false);
 	}
 	return 0;
 }

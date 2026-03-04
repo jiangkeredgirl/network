@@ -1,4 +1,5 @@
-﻿#include "cstandard.h"
+﻿// 1. 实现 ISerialPortHandler，用于打印回调
+#include "cstandard.h"
 #include "SerialPortHandlerCenter.h"
 
 
@@ -17,6 +18,8 @@ SerialPortHandlerCenter::~SerialPortHandlerCenter()
 
 int SerialPortHandlerCenter::OnSerialPortConnect(int errorcode, string errormsg)
 {
+	cout << "[Callback] Connect: " << errorcode << " " << errormsg << endl;
+
 	if (errorcode)
 	{
 		cout << "connect failed, errorcode:" << errorcode << endl;
@@ -37,6 +40,8 @@ int SerialPortHandlerCenter::OnSerialPortConnect(int errorcode, string errormsg)
 
 int SerialPortHandlerCenter::OnSerialPortDisconnect(int errorcode, string errormsg)
 {
+	cout << "[Callback] Disconnect: " << errorcode << " " << errormsg << endl;
+
 	cout << "have disconnected, errorcode:" << errorcode << endl;
 	if (errorcode)
 	{
@@ -51,6 +56,12 @@ int SerialPortHandlerCenter::OnSerialPortDisconnect(int errorcode, string errorm
 
 int SerialPortHandlerCenter::OnSerialPortRead(const char* data, size_t size, int errorcode, string errormsg)
 {
+	cout << "[Callback] Read: " << size << " bytes, error=" << errorcode << ", " << errormsg << endl;
+	cout << "[Data] ";
+	for (size_t i = 0; i < size; i++)
+		cout << hex << (0xFF & data[i]) << " ";
+	cout << dec << endl;
+
 	if (data)
 	{
 		string str(data, size);
@@ -61,6 +72,12 @@ int SerialPortHandlerCenter::OnSerialPortRead(const char* data, size_t size, int
 
 int SerialPortHandlerCenter::OnSerialPortWrite(const char* data, size_t size, int errorcode, string errormsg)
 {
+	cout << "[Callback] Write: " << size << " bytes, error=" << errorcode << ", " << errormsg << endl;
+	cout << "[Data] ";
+	for (size_t i = 0; i < size; i++)
+		cout << hex << (0xFF & data[i]) << " ";
+	cout << dec << endl;
+
 	if (data)
 	{
 		string str(data, size);
@@ -71,6 +88,8 @@ int SerialPortHandlerCenter::OnSerialPortWrite(const char* data, size_t size, in
 
 int SerialPortHandlerCenter::OnSerialPortError(int errorcode, string errormsg)
 {
+	cout << "[Callback] Error: " << errorcode << " " << errormsg << endl;
+
 	if (errorcode)
 	{
 		cout << "occure error errorcode:" << errorcode << "errormsg:" << errormsg << endl;

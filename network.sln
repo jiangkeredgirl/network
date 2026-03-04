@@ -16,6 +16,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkClient", "NetworkCli
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SerialPortClient", "SerialPortClient\SerialPortClient.vcxproj", "{80581D89-3ED4-4173-BC27-7E2ADC340004}"
+	ProjectSection(ProjectDependencies) = postProject
+		{86B5F0CB-D58D-47D1-B8C3-183A4739D0ED} = {86B5F0CB-D58D-47D1-B8C3-183A4739D0ED}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
