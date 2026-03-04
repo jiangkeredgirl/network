@@ -1,5 +1,5 @@
 /*********************************************************************
- * \file   KSerialPort.h
+ * \file   SerialPortImpl.h
  * \brief  串口类.
  * \author 蒋珂
  * \date   2024.08.29
@@ -7,43 +7,56 @@
 #pragma once
 
 
-#include "kcommonhpp/kcommon.h"
+#include <string>
+#include <cstddef>
+#include <memory>
 #include <asio.hpp>
+#include "kutility.h"
+#include "kcommon.h"
+#include "serialport.h"
+using namespace std;
+using namespace asio;
 
-//using namespace std;
-//using namespace asio;
 
-typedef string any_type;
-typedef std::function<void(const std::vector<std::byte>& bytes)> ReadBytesFunction;
-typedef std::function<void(const std::string& hexstr)> ReadHexStrFunction;
-typedef std::function<void(int error_code, string error_msg)> SerialErrorFunction;
-
-class KSerialPort
+class CSerialPortImpl : public ISerialPort
 {
+
 public:
-    KSerialPort(/* const any_type &port_name, */ReadHexStrFunction read_callback, SerialErrorFunction error_callback )
+    virtual int RegisterHandler(ReadBytesFunction read_byte_callback, ReadHexStrFunction read_hex_callback, SerialErrorFunction error_callback) override
     {
-        m_read_hexstr_callback = read_callback;
+        m_read_bytes_callback  = read_byte_callback;
+        m_read_hexstr_callback = read_hex_callback;        
         m_error_callback       = error_callback;
-        m_serial = new asio::serial_port( m_ios );
-        // if ( m_serial )
-        // {
-        //     open( port_name);
-        // }
+        return 0;
     }
-private:
-    KSerialPort(/* const any_type &port_name, */ReadBytesFunction read_callback, SerialErrorFunction error_callback )
+    virtual int Connect(const any_type& port) override
     {
-        m_read_bytes_callback = read_callback;
-        m_error_callback      = error_callback;
+        return open(port);
+    }
+    virtual int Disconnect() override
+    {
+        return close();
+    }
+    virtual int WriteHexStr(const string& wirte_hexstr) override
+    {
+        return writeHexStr(wirte_hexstr);
+    }
+    virtual int WriteHexStr(const string& wirte_hexstr, string& read_hexstr, int timeout_msec = 1000) override
+    {
+        return writeHexStr(wirte_hexstr, read_hexstr, timeout_msec);
+    }
+
+public:
+    CSerialPortImpl()
+    {
+
         m_serial = new asio::serial_port( m_ios );
         // if ( m_serial )
         // {
         //     open( port_name);
         // }
     }
-public:
-    ~KSerialPort()
+    virtual ~CSerialPortImpl()
     {
         close();
         if( m_serial )
@@ -230,7 +243,7 @@ private:
     //async Write some data to port
     void asyncWrite(const std::vector<std::byte>& bytes)
     {
-        m_serial->async_write_some(asio::buffer(static_cast<const void*>(bytes.data()), bytes.size()), std::bind(&KSerialPort::writeCallback, this, std::placeholders::_1, std::placeholders::_2));
+        m_serial->async_write_some(asio::buffer(static_cast<const void*>(bytes.data()), bytes.size()), std::bind(&CSerialPortImpl::writeCallback, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     //The asyanc callback function of asyanc_write
@@ -342,7 +355,7 @@ private:
     //Read data from port which write data just now
     void asyncRead()
     {        
-        m_serial->async_read_some(asio::buffer(m_read_buffer), std::bind( &KSerialPort::readCallback, this, m_read_buffer, std::placeholders::_1, std::placeholders::_2) );
+        m_serial->async_read_some(asio::buffer(m_read_buffer), std::bind( &CSerialPortImpl::readCallback, this, m_read_buffer, std::placeholders::_1, std::placeholders::_2) );
     }
 
     //The asyanc callback function of asyanc_read
@@ -403,7 +416,7 @@ private:
     any_type               m_port; // For save com name
     asio::error_code       m_ec;   //Serial_port function exception
     atomic<bool>           m_read_cancel;
-    thread                 m_read_thread;
+    std::thread            m_read_thread;
     ReadBytesFunction      m_read_bytes_callback  = nullptr;
     ReadHexStrFunction     m_read_hexstr_callback = nullptr;
     SerialErrorFunction    m_error_callback       = nullptr;

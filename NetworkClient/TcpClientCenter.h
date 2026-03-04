@@ -7,6 +7,7 @@ public:
 	static TcpClientCenter& instance();
 
 public:
+	int TestSerialPort();
 	int Run(bool async);
 };
 
