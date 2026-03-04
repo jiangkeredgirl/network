@@ -57,7 +57,7 @@ int SerialPortHandlerCenter::OnSerialPortDisconnect(int errorcode, string errorm
 int SerialPortHandlerCenter::OnSerialPortRead(const char* data, size_t size, int errorcode, string errormsg)
 {
 	cout << "[Callback] Read: " << size << " bytes, error=" << errorcode << ", " << errormsg << endl;
-	cout << "[Data] ";
+	cout << "[Data Hex] ";
 	for (size_t i = 0; i < size; i++)
 		cout << hex << (0xFF & data[i]) << " ";
 	cout << dec << endl;
@@ -65,7 +65,7 @@ int SerialPortHandlerCenter::OnSerialPortRead(const char* data, size_t size, int
 	if (data)
 	{
 		string str(data, size);
-		cout << "readed data:" << str << endl;
+		cout << "[Data Char]" << str << endl;
 	}
 	return 0;
 }

@@ -19,7 +19,7 @@ CSerialPortImpl::CSerialPortImpl()
     handler_(nullptr),
     request_id_(0),
     heartbeat_interval_ms_(3000),
-    enable_crc_(true),
+    enable_crc_(false),
     reconnect_attempt_(0),
     use_frame_(false),
     frame_head_(0xAA),
@@ -157,75 +157,115 @@ void CSerialPortImpl::DoRead()
                 }
 
                 if (length > 0)
+                {
+                    cout << "[Serial] Read Length: " << length << endl;
                     ProcessRawData(read_buffer_.data(), length);
+                }
 
                 // 永远循环读
                 DoRead();
             }));
 }
 
+// 工业级 ProcessRawData
 void CSerialPortImpl::ProcessRawData(const char* data, size_t len)
 {
+    // 将新收到的数据加入缓存
     recv_cache_.insert(recv_cache_.end(), data, data + len);
 
     while (!recv_cache_.empty())
     {
+        // 如果启用帧头帧尾模式
         if (use_frame_)
         {
-            // 查找帧头
-            if (recv_cache_[0] != frame_head_)
+            // 找到帧头
+            auto head_it = std::find(recv_cache_.begin(), recv_cache_.end(), frame_head_);
+            if (head_it == recv_cache_.end())
             {
-                recv_cache_.erase(recv_cache_.begin());
-                continue;
+                // 没有找到帧头，清空缓存
+                recv_cache_.clear();
+                break;
             }
 
-            auto tail_it = std::find(recv_cache_.begin(), recv_cache_.end(), frame_tail_);
+            // 丢弃帧头之前的数据
+            if (head_it != recv_cache_.begin())
+                recv_cache_.erase(recv_cache_.begin(), head_it);
+
+            // 查找帧尾
+            auto tail_it = std::find(recv_cache_.begin() + 1, recv_cache_.end(), frame_tail_);
             if (tail_it == recv_cache_.end())
-                break; // 等待完整帧
+            {
+                // 等待更多数据
+                break;
+            }
 
             size_t frame_len = std::distance(recv_cache_.begin(), tail_it) + 1;
-            std::vector<char> frame(recv_cache_.begin(), recv_cache_.begin() + frame_len);
+            vector<char> frame(recv_cache_.begin(), recv_cache_.begin() + frame_len);
+
+            // 从缓存移除已处理的数据
             recv_cache_.erase(recv_cache_.begin(), recv_cache_.begin() + frame_len);
 
+            // 处理帧
             HandleFrame(frame);
         }
         else
         {
-            // 无帧头帧尾模式，直接把缓存全部当作一条消息
-            std::vector<char> frame = std::move(recv_cache_);
+            // 禁用帧头帧尾模式：将缓存中的所有数据作为一帧处理
+            vector<char> frame = std::move(recv_cache_);
             recv_cache_.clear();
             HandleFrame(frame);
-            break;
+            break; // 一次处理完所有数据
         }
     }
 }
 
-void CSerialPortImpl::HandleFrame(const std::vector<char>& frame)
+// 工业级 HandleFrame
+void CSerialPortImpl::HandleFrame(const vector<char>& frame)
 {
-    asio::post(strand_, [this, frame]() {
+    cout << "[Serial] Frame Received Size=" << frame.size() << endl;
+    if (frame.empty())
+        return;
 
-        if (frame.size() < 5)
+    cout << "[Serial] Frame Received, size=" << frame.size() << ", data=";
+    for (auto b : frame) cout << hex << (int)(uint8_t)b << " ";
+    cout << dec << endl;
+
+    // CRC 校验（如果启用）
+    if (enable_crc_ && frame.size() >= 3)
+    {
+        uint16_t recv_crc = *(uint16_t*)&frame[frame.size() - 3];
+        uint16_t calc_crc = CRC16((uint8_t*)frame.data(), frame.size() - 3);
+
+        if (recv_crc != calc_crc)
+        {
+            cout << "[Serial] CRC Error\n";
+            if (handler_)
+                handler_->OnSerialPortError(-1, "CRC Error");
             return;
+        }
+    }
 
-        uint16_t id = *(uint16_t*)&frame[1];
+    // 尝试匹配请求-响应
+    if (frame.size() >= 3) // 至少要有ID和内容
+    {
+        uint16_t id = *(uint16_t*)&frame[1]; // 假设ID在 [1,2] 位置
 
         auto it = pending_requests_.find(id);
         if (it != pending_requests_.end())
         {
             auto req = it->second;
+            req->response = frame;
+            req->promise.set_value(frame);
+            pending_requests_.erase(it);
 
-            if (!req->completed.exchange(true))
-            {
-                req->promise.set_value(frame);
-                pending_requests_.erase(it);
-                std::cout << "[Serial] Matched Response ID=" << id << "\n";
-            }
+            cout << "[Serial] Matched Response ID=" << id << endl;
             return;
         }
+    }
 
-        if (handler_)
-            handler_->OnSerialPortRead(frame.data(), frame.size(), 0, "OK");
-        });
+    // 普通接收数据回调
+    if (handler_)
+        handler_->OnSerialPortRead(frame.data(), frame.size(), 0, "OK");
 }
 
 int CSerialPortImpl::Write(const char* data, size_t size)
