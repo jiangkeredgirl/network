@@ -222,48 +222,47 @@ void CSerialPortImpl::ProcessRawData(const char* data, size_t len)
 // 工业级 HandleFrame
 void CSerialPortImpl::HandleFrame(const vector<char>& frame)
 {
-    cout << "[Serial] Frame Received Size=" << frame.size() << endl;
-    if (frame.empty())
-        return;
+    if (frame.empty()) return;
 
-    // 打印调试
-    cout << "[Serial] Frame Received, size=" << frame.size() << ", data=";
-    for (auto b : frame) cout << hex << (int)(uint8_t)b << " ";
-    cout << dec << endl;
+    cout << "[Serial] Frame Received, size=" << frame.size() << endl;
 
-    // CRC 校验（如果启用）
+    // CRC 校验可选
     if (enable_crc_ && frame.size() >= 3)
     {
         uint16_t recv_crc = *(uint16_t*)&frame[frame.size() - 3];
         uint16_t calc_crc = CRC16((uint8_t*)frame.data(), frame.size() - 3);
-
         if (recv_crc != calc_crc)
         {
-            cout << "[Serial] CRC Error\n";
             if (handler_)
                 handler_->OnSerialPortError(-1, "CRC Error");
             return;
         }
     }
 
-    // 请求-响应匹配
-    if (frame.size() >= 3) // 至少要有ID和内容
+    // 匹配第一个未超时请求
+    while (!pending_requests_queue_.empty())
     {
-        uint16_t id = *(uint16_t*)&frame[1]; // 假设ID在 [1,2] 位置
-        auto it = pending_requests_.find(id);
-        if (it != pending_requests_.end())
+        auto req = pending_requests_queue_.front();
+        pending_requests_queue_.pop_front();
+
+        // 只匹配未完成请求
+        if (!req->completed.exchange(true))
         {
-            auto req = it->second;
             req->response = frame;
             req->promise.set_value(frame);
-            pending_requests_.erase(it);
 
-            cout << "[Serial] Matched Response ID=" << id << endl;
+            cout << "[Serial] Response matched to pending request\n";
             return;
+        }
+        else
+        {
+            // 已超时，跳过到下一个
+            cout << "[Serial] Skipped expired request\n";
+            continue;
         }
     }
 
-    // 普通接收数据回调
+    // 如果没有未超时请求，普通回调
     if (handler_)
         handler_->OnSerialPortRead(frame.data(), frame.size(), 0, "OK");
 }
@@ -313,51 +312,45 @@ void CSerialPortImpl::DoWrite()
             }));
 }
 
-int CSerialPortImpl::Write(const char* data,
+int CSerialPortImpl::Write(
+    const char* data,
     size_t size,
     char** response_data,
     size_t& response_data_size,
     int timeout_ms)
 {
     response_data_size = 0;
+    if (!IsConnected()) return -1;
 
-    if (!IsConnected())
-        return -1;
+    auto req = make_shared<PendingRequest>();
+    req->timer = make_shared<asio::steady_timer>(io_);
 
-    uint16_t id = GenerateRequestID();
-
-    auto req = std::make_shared<PendingRequest>();
-    req->id = id;
-    req->timer = std::make_shared<asio::steady_timer>(io_);
-
-    asio::post(strand_, [this, req]() {
-        pending_requests_[req->id] = req;
+    // 放入 pending 请求队列
+    asio::post(strand_, [this, req]()
+        {
+            pending_requests_queue_.push_back(req);
         });
 
+    // 发送数据
     Write(data, size);
 
-    req->timer->expires_after(std::chrono::milliseconds(timeout_ms));
+    // 设置超时
+    req->timer->expires_after(chrono::milliseconds(timeout_ms));
     req->timer->async_wait(asio::bind_executor(strand_,
-        [this, req](const error_code& ec)
+        [req](const asio::error_code& ec)
         {
             if (!ec && !req->completed.exchange(true))
             {
-                std::cout << "[Serial] Timeout ID=" << req->id << "\n";
-                req->promise.set_value({});
-                pending_requests_.erase(req->id);
+                cout << "[Serial] Request Timeout\n";
+                req->promise.set_value(vector<char>()); // 超时返回空
             }
         }));
 
-    auto future = req->promise.get_future();
+    // 等待返回
+    future<vector<char>> fut = req->promise.get_future();
+    vector<char> result = fut.get(); // 阻塞等待结果或超时
 
-    if (future.wait_for(std::chrono::milliseconds(timeout_ms + 100))
-        != std::future_status::ready)
-        return -2;
-
-    auto result = future.get();
-
-    if (result.empty())
-        return -3;
+    if (result.empty()) return -2; // 超时或无数据
 
     response_data_size = result.size();
     *response_data = new char[result.size()];

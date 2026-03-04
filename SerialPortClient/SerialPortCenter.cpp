@@ -91,10 +91,19 @@ int SerialPortCenter::Run(bool async)
 			else
 			{
 				serialport_client->Write(input_flag.c_str(), input_flag.size());
-				char** response_data = nullptr;
+				char* response_data = nullptr;
 				size_t response_data_size = 0;
-				int timeout_ms = 100000;
-				serialport_client->Write(input_flag.c_str(), input_flag.size(), response_data, response_data_size, timeout_ms);
+				int timeout_ms = 10000;
+				serialport_client->Write(input_flag.c_str(), input_flag.size(), &response_data, response_data_size, timeout_ms);
+				cout << "[Response] Read: " << response_data_size << " bytes" << endl;
+				cout << "[Response Data Hex] ";
+				for (size_t i = 0; i < response_data_size; i++)
+				{
+					cout << hex << (0xFF & response_data[i]) << " ";
+				}
+				cout << dec << endl;
+				string str(response_data, response_data_size);
+				cout << "[Response Data Char]" << str << endl;
 			}
 		}
 	} while (true);

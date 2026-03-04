@@ -119,4 +119,6 @@ private:
     uint8_t frame_tail_;           // 帧尾
 private:
     bool enable_heartbeat_;  // 是否启用心跳
+private:
+    deque<shared_ptr<PendingRequest>> pending_requests_queue_; // 请求-响应 匹配
 };
