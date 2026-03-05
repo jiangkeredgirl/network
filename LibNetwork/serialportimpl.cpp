@@ -272,14 +272,17 @@ int CSerialPortImpl::Write(const vector<char>& data, vector<char>& response_data
     // 等待响应
     std::unique_lock<std::mutex> lock(resp_mutex_);
 
-    if (!resp_cv_.wait_for(lock,
+    if (!resp_cv_.wait_for(
+        lock,
         std::chrono::milliseconds(timeout_ms),
         [this] { return resp_ready_; }))
     {
-        return -2; // timeout
+        std::cout << "[Serial] Response timeout\n";
+        return -1;
     }
 
     response_data = resp_buffer_;
+
     return 0;
 }
 
