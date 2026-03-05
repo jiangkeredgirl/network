@@ -255,30 +255,31 @@ int CSerialPortImpl::Write(const vector<char>& data)
 int CSerialPortImpl::Write(const vector<char>& data, vector<char>& response_data, int timeout_ms)
 {
     response_data.clear();
+    if (!IsConnected())
+        return -1;
 
-    if (!IsConnected()) return -1;
+    {
+        std::lock_guard<std::mutex> lock(resp_mutex_);
+        resp_ready_ = false;
+        resp_buffer_.clear();
+    }
 
-    auto req = make_shared<PendingRequest>();
-    req->timer = make_shared<asio::steady_timer>(io_);
-    asio::post(strand_, [this, req]() { pending_requests_[0] = req; });
+    // 发送请求
+    int ret = AsyncWrite(data);
+    if (ret != 0)
+        return ret;
 
-    Write(data);
+    // 等待响应
+    std::unique_lock<std::mutex> lock(resp_mutex_);
 
-    req->timer->expires_after(chrono::milliseconds(timeout_ms));
-    req->timer->async_wait(asio::bind_executor(strand_, [this, req](error_code ec) {
-        if (!ec)
-        {
-            if (pending_requests_.count(0))
-            {
-                pending_requests_.erase(0);
-            }
-        }
-        }));
+    if (!resp_cv_.wait_for(lock,
+        std::chrono::milliseconds(timeout_ms),
+        [this] { return resp_ready_; }))
+    {
+        return -2; // timeout
+    }
 
-    future<vector<char>> fut = req->promise.get_future();
-    vector<char> result = fut.get();
-
-    response_data = result;
+    response_data = resp_buffer_;
     return 0;
 }
 
@@ -334,6 +335,36 @@ void CSerialPortImpl::StopHeartbeat()
     if (heartbeat_timer_) heartbeat_timer_->cancel();
 }
 
+void CSerialPortImpl::OnReceive(const std::vector<char>& data)
+{
+    std::cout << "[Serial] Receive size=" << data.size() << std::endl;
+
+    {
+        std::lock_guard<std::mutex> lock(resp_mutex_);
+
+        // 累加数据（解决分包）
+        resp_buffer_.insert(
+            resp_buffer_.end(),
+            data.begin(),
+            data.end()
+        );
+
+        resp_ready_ = true;
+    }
+
+    resp_cv_.notify_one();
+
+    // 回调用户
+    if (handler_interface_)
+    {
+        handler_interface_->OnRead(data, {});
+    }
+
+    if (handler_function_.onreadfun)
+    {
+        handler_function_.onreadfun(data, {});
+    }
+}
 
 
 LIBSERIALPORT_API ISerialPort* NewSerialPort(void)

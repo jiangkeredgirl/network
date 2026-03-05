@@ -84,6 +84,10 @@ private:
     uint16_t CRC16(const uint8_t* data, size_t len);
 
 private:
+    // 内部接收数据处理
+    void OnReceive(const std::vector<char>& data);
+
+private:
     asio::io_context io_;
     asio::serial_port serial_;
     asio::strand<asio::io_context::executor_type> strand_;
@@ -106,4 +110,11 @@ private:
     SerialConfig config_;
     int reconnect_attempt_;
     mutex write_mutex_;
+    /// <summary>
+    /// 请求-响应
+    /// </summary>
+    std::mutex resp_mutex_;
+    std::condition_variable resp_cv_;
+    std::vector<char> resp_buffer_;
+    bool resp_ready_ = false;
 };
