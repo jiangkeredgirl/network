@@ -16,13 +16,13 @@ SerialPortHandlerCenter::~SerialPortHandlerCenter()
 }
 
 
-int SerialPortHandlerCenter::OnSerialPortConnect(int errorcode, string errormsg)
+int SerialPortHandlerCenter::OnConnect(std::error_code ec)
 {
-	cout << "[Callback] Connect: " << errorcode << " " << errormsg << endl;
+	cout << "[Callback] Connect: " << ec.value() << " " << ec.message() << endl;
 
-	if (errorcode)
+	if (ec)
 	{
-		cout << "connect failed, errorcode:" << errorcode << endl;
+		cout << "connect failed, errorcode:" << ec << endl;
 		std::thread t([this]() {
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			m_serialport_client->AsyncConnect(m_portname, m_baudrate);
@@ -32,18 +32,18 @@ int SerialPortHandlerCenter::OnSerialPortConnect(int errorcode, string errormsg)
 	}
 	else
 	{
-		cout << "connect success, errorcode:" << errorcode << endl;
+		cout << "connect success, errorcode:" << ec << endl;
 	}
 
 	return 0;
 }
 
-int SerialPortHandlerCenter::OnSerialPortDisconnect(int errorcode, string errormsg)
+int SerialPortHandlerCenter::OnDisconnect(std::error_code ec)
 {
-	cout << "[Callback] Disconnect: " << errorcode << " " << errormsg << endl;
+	cout << "[Callback] Disconnect: " << ec.value() << " " << ec.message() << endl;
 
-	cout << "have disconnected, errorcode:" << errorcode << endl;
-	if (errorcode)
+	cout << "have disconnected, errorcode:" << ec << endl;
+	if (ec)
 	{
 		cout << "abnormal disconnect, reconnect"<< endl;
 		std::thread t([this]() {
@@ -54,45 +54,45 @@ int SerialPortHandlerCenter::OnSerialPortDisconnect(int errorcode, string errorm
 	return 0;
 }
 
-int SerialPortHandlerCenter::OnSerialPortRead(const char* data, size_t size, int errorcode, string errormsg)
+int SerialPortHandlerCenter::OnRead(const vector<char>& data, std::error_code ec)
 {
-	cout << "[Callback] Read: " << size << " bytes, error=" << errorcode << ", " << errormsg << endl;
+	cout << "[Callback] Read: " << data.size() << " bytes, error=" << ec.value() << ", " << ec.message() << endl;
 	cout << "[Data Hex] ";
-	for (size_t i = 0; i < size; i++)
+	for (size_t i = 0; i < data.size(); i++)
 		cout << hex << (0xFF & data[i]) << " ";
 	cout << dec << endl;
 
-	if (data)
+	if (!data.empty())
 	{
-		string str(data, size);
+		string str(data.begin(), data.end());
 		cout << "[Data Char]" << str << endl;
 	}
 	return 0;
 }
 
-int SerialPortHandlerCenter::OnSerialPortWrite(const char* data, size_t size, int errorcode, string errormsg)
+int SerialPortHandlerCenter::OnWrite(const vector<char>& data, std::error_code ec)
 {
-	cout << "[Callback] Write: " << size << " bytes, error=" << errorcode << ", " << errormsg << endl;
+	cout << "[Callback] Write: " << data.size() << " bytes, error=" << ec.value() << ", " << ec.message() << endl;
 	cout << "[Data] ";
-	for (size_t i = 0; i < size; i++)
+	for (size_t i = 0; i < data.size(); i++)
 		cout << hex << (0xFF & data[i]) << " ";
 	cout << dec << endl;
 
-	if (data)
+	if (!data.empty())
 	{
-		string str(data, size);
+		string str(data.begin(), data.end());
 		cout << "writed data:" << str << endl;
 	}
 	return 0;
 }
 
-int SerialPortHandlerCenter::OnSerialPortError(int errorcode, string errormsg)
+int SerialPortHandlerCenter::OnError(std::error_code ec)
 {
-	cout << "[Callback] Error: " << errorcode << " " << errormsg << endl;
+	cout << "[Callback] Error: " << ec.value() << " " << ec.message() << endl;
 
-	if (errorcode)
+	if (ec)
 	{
-		cout << "occure error errorcode:" << errorcode << "errormsg:" << errormsg << endl;
+		cout << "occure error errorcode:" << ec.value() << "errormsg:" << ec.message() << endl;
 	}
 	return 0;
 }

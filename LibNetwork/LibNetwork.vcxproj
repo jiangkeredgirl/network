@@ -176,10 +176,17 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CRC16.h" />
     <ClInclude Include="NetDataPackage.h" />
+    <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="SerialConfig.h" />
+    <ClInclude Include="SerialError.h" />
+    <ClInclude Include="SerialFrame.h" />
+    <ClInclude Include="SerialLogger.h" />
     <ClInclude Include="serialport.h" />
     <ClInclude Include="serialportimpl.h" />
     <ClInclude Include="serialportimplk.h" />
+    <ClInclude Include="SerialTypes.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />
     <ClInclude Include="tcpclientimpl.h" />
@@ -192,6 +199,9 @@
     <ClInclude Include="tcpserversocket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="SerialFrame.cpp" />
+    <ClCompile Include="SerialLogger.cpp" />
     <ClCompile Include="serialportimpl.cpp" />
     <ClCompile Include="serialportimplk.cpp" />
     <ClCompile Include="tcpclientimpl.cpp" />

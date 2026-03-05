@@ -6,18 +6,19 @@
  *********************************************************************/
 #pragma once
 
-#include "serialport.h"   // ISerialPort 和 ISerialPortHandler 已在其他文件声明
-
-#define ASIO_STANDALONE
+#include "serialport.h"
+#include "SerialConfig.h"
+#include "SerialTypes.h"
+#include "SerialFrame.h"
+#include "CRC16.h"
+#include "RingBuffer.h"
+#include "SerialLogger.h"
+#include "SerialError.h"
 #include <asio.hpp>
 #include <thread>
-#include <atomic>
 #include <deque>
-#include <vector>
-#include <iostream>
-#include <future>
-
-using namespace std;
+#include <map>
+#include <atomic>
 
 class CSerialPortImpl : public ISerialPort
 {
@@ -25,86 +26,38 @@ public:
     CSerialPortImpl();
     ~CSerialPortImpl();
 
-    // ---------------- 接口实现 ----------------
+    int RegisterHandler(ISerialPortHandlerFunction handler_fun) override;
     int RegisterHandler(ISerialPortHandler* handler) override;
-
-    int Connect(const string& portname, int baudrate = 115200) override;
-    int AsyncConnect(const string& portname, int baudrate = 115200) override;
+    int Connect(const std::string& portname, int baudrate = 115200) override;
+    int AsyncConnect(const std::string& portname, int baudrate = 115200) override;
     int Disconnect() override;
-
-    int Write(const char* data, size_t size) override;
-
-    int Write(const char* data,
-        size_t size,
-        char** response_data,
-        size_t& response_data_size,
-        int timeout_ms) override;
-
-    int AsyncWrite(const char* data, size_t size) override;
-
+    int Write(const std::vector<char>& data) override;
+    int Write(const std::vector<char>& data, std::vector<char>& response_data, int timeout_ms) override;
+    int AsyncWrite(const std::vector<char>& data) override;
     bool IsConnected() const override;
-
-    // ---------------- 工业级特性 ----------------
-    void EnableCRC(bool enable);
-    void SetFrameHeadTail(bool enable, char head = 0xAA, char tail = 0x55);
-    void EnableHeartbeat(bool enable, int interval_ms = 3000);
-
-private:
-    enum class State
-    {
-        Disconnected,
-        Connecting,
-        Connected,
-        Reconnecting,
-        Closing
-    };
-
-    struct PendingRequest
-    {
-        vector<char> response;
-        shared_ptr<asio::steady_timer> timer;
-        promise<vector<char>> promise;
-        atomic<bool> completed{ false };
-    };
 
 private:
     void DoConnect();
     void DoRead();
-    void ProcessRawData(const char* data, size_t len);
-    void HandleFrame(const vector<char>& frame);
     void DoWrite();
     void HandleReconnect();
-
-    void StartHeartbeat();
-    void SendHeartbeat();
-    void StopHeartbeat();
-
-    uint16_t CRC16(const uint8_t* data, size_t len);
+    void ProcessRawData();
 
 private:
     asio::io_context io_;
     asio::serial_port serial_;
     asio::strand<asio::io_context::executor_type> strand_;
-    unique_ptr<thread> io_thread_;
-    atomic<State> state_;
-
-    string portname_;
+    std::unique_ptr<std::thread> io_thread_;
+    std::atomic<bool> connected_;
+    std::string portname_;
     int baudrate_;
     ISerialPortHandler* handler_;
+    ISerialPortHandlerFunction handler_fun_;
 
-    array<char, 4096> read_buffer_;
-    vector<char> recv_cache_;
-    deque<vector<char>> write_queue_;
+    RingBuffer ringbuf_;
+    std::deque<std::vector<char>> write_queue_;
+    std::vector<char> recv_cache_;
 
-    deque<shared_ptr<PendingRequest>> pending_requests_queue_;
-
-    // 帧/CRC/心跳
-    bool enable_crc_;
-    bool use_frame_;
-    char frame_head_;
-    char frame_tail_;
-    shared_ptr<asio::steady_timer> heartbeat_timer_;
-    int heartbeat_interval_ms_;
-    bool heartbeat_enable_;
-    int reconnect_attempt_;
+    SerialConfig config_;
+    std::atomic<bool> running_;
 };

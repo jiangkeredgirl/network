@@ -57,6 +57,27 @@
     <ClInclude Include="serialportimplk.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CRC16.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RingBuffer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialError.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialFrame.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialLogger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialTypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tcpclientsocket.cpp">
@@ -78,6 +99,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="serialportimplk.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RingBuffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialFrame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialLogger.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

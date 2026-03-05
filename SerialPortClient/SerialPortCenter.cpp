@@ -84,25 +84,25 @@ int SerialPortCenter::Run(bool async)
 		}
 		else
 		{
+			vector<char> data(input_flag.begin(), input_flag.end());
 			if (async)
 			{
-				serialport_client->AsyncWrite(input_flag.c_str(), input_flag.size());
+				serialport_client->AsyncWrite(data);
 			}
 			else
 			{
-				serialport_client->Write(input_flag.c_str(), input_flag.size());
-				char* response_data = nullptr;
-				size_t response_data_size = 0;
+				serialport_client->Write(data);
+				vector<char> response_data;				
 				int timeout_ms = 10000;
-				serialport_client->Write(input_flag.c_str(), input_flag.size(), &response_data, response_data_size, timeout_ms);
-				cout << "[Response] Read: " << response_data_size << " bytes" << endl;
+				serialport_client->Write(data, response_data, timeout_ms);
+				cout << "[Response] Read: " << response_data.size() << " bytes" << endl;
 				cout << "[Response Data Hex] ";
-				for (size_t i = 0; i < response_data_size; i++)
+				for (size_t i = 0; i < response_data.size(); i++)
 				{
 					cout << hex << (0xFF & response_data[i]) << " ";
 				}
 				cout << dec << endl;
-				string str(response_data, response_data_size);
+				string str(response_data.begin(), response_data.end());
 				cout << "[Response Data Char]" << str << endl;
 			}
 		}

@@ -10,11 +10,11 @@ public:
 	~SerialPortHandlerCenter();
 
 public:
-	virtual int OnSerialPortConnect(int errorcode, string errormsg) override;
-	virtual int OnSerialPortDisconnect(int errorcode, string errormsg) override;
-	virtual int OnSerialPortRead(const char* data, size_t size, int errorcode, string errormsg) override;
-	virtual int OnSerialPortWrite(const char* data, size_t size, int errorcode, string errormsg) override;
-	virtual int OnSerialPortError(int errorcode, string errormsg) override; 
+	virtual int OnConnect(std::error_code ec) override;                         // 串口连接的回调事件
+	virtual int OnDisconnect(std::error_code ec) override;                      // 串口断开的回调事件
+	virtual int OnRead(const vector<char>& data, std::error_code ec) override;  // 串口读取数据的回调事件
+	virtual int OnWrite(const vector<char>& data, std::error_code ec) override; // 串口写入数据的回调事件
+	virtual int OnError(std::error_code ec) override;                           // 串口发生错误的回调事件
 
 private:
 	ISerialPort*  m_serialport_client = nullptr;
