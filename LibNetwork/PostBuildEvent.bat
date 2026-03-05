@@ -6,7 +6,7 @@ echo f|xcopy /y  .\tcpserver.h                     .\OutNetworkSDK\include\
 echo f|xcopy /y  .\tcpserverhandler.h              .\OutNetworkSDK\include\
 echo f|xcopy /y  .\TcpPackage.h                    .\OutNetworkSDK\include\
 echo f|xcopy /y  .\serialport.h                    .\OutNetworkSDK\include\
-rem echo f|xcopy /y  .\serialporthandler.h             .\OutNetworkSDK\include\
+echo f|xcopy /y  .\serialportk.h                   .\OutNetworkSDK\include\
 echo f|xcopy /y  .\bin\LibNetwork*.lib             .\OutNetworkSDK\lib\
 echo f|xcopy /y  .\bin\LibNetwork*.dll             .\OutNetworkSDK\bin\
 echo f|xcopy /y  .\bin\LibNetwork*.pdb             .\OutNetworkSDK\bin\
