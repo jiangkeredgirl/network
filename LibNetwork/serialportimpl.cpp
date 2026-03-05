@@ -7,9 +7,14 @@
 #include "SerialPortImpl.h"
 
 
+using error_code = asio::error_code;
+
+static const uint8_t FRAME_HEAD_DEFAULT = 0xAA;
+static const uint8_t FRAME_TAIL_DEFAULT = 0x55;
+
 CSerialPortImpl::CSerialPortImpl()
-    : serial_(io_), strand_(asio::make_strand(io_)),
-    connected_(false), handler_(nullptr), running_(true)
+    : serial_(io_), strand_(asio::make_strand(io_)), state_(State::Disconnected),
+    handler_interface_(nullptr), request_id_(0), reconnect_attempt_(0)
 {
 }
 
@@ -18,166 +23,315 @@ CSerialPortImpl::~CSerialPortImpl()
     Disconnect();
 }
 
-int CSerialPortImpl::RegisterHandler(ISerialPortHandlerFunction handler_fun)
+bool CSerialPortImpl::IsConnected() const
 {
-    handler_fun_ = handler_fun;
-    return 0;
+    return state_ == State::Connected;
 }
 
 int CSerialPortImpl::RegisterHandler(ISerialPortHandler* handler)
 {
-    handler_ = handler;
+    handler_interface_ = handler;
     return 0;
 }
 
-int CSerialPortImpl::Connect(const std::string& portname, int baudrate)
+int CSerialPortImpl::RegisterHandler(ISerialPortHandlerFunction handler_fun)
+{
+    handler_function_ = handler_fun;
+    return 0;
+}
+
+int CSerialPortImpl::Connect(const string& portname, int baudrate)
 {
     portname_ = portname;
     baudrate_ = baudrate;
+
     try
     {
         serial_.open(portname_);
         serial_.set_option(asio::serial_port_base::baud_rate(baudrate_));
-        connected_ = true;
 
-        io_thread_ = std::make_unique<std::thread>([this]() {
-            io_.run();
-            });
+        state_ = State::Connected;
+        reconnect_attempt_ = 0;
 
-        if (handler_) handler_->OnConnect({});
+        io_thread_.reset(new thread([this]() { io_.run(); }));
+
         DoRead();
+        if (config_.enable_heartbeat) SendHeartbeat();
+
+        error_code ec;
+        if (handler_interface_) handler_interface_->OnConnect(ec);
+        if (handler_function_.onconnectfun) handler_function_.onconnectfun(ec);
+
+        cout << "[Serial] Connected\n";
         return 0;
     }
-    catch (std::exception& e)
+    catch (exception& e)
     {
-        if (handler_) handler_->OnConnect(make_error_code(SerialErrc::NotConnected));
+        cout << "[Serial] Connect Failed: " << e.what() << endl;
+        HandleReconnect();
         return -1;
     }
 }
 
+int CSerialPortImpl::AsyncConnect(const string& portname, int baudrate)
+{
+    portname_ = portname;
+    baudrate_ = baudrate;
+
+    io_thread_.reset(new thread([this]() { io_.run(); }));
+    asio::post(strand_, [this]() { DoConnect(); });
+    return 0;
+}
+
+void CSerialPortImpl::DoConnect()
+{
+    try
+    {
+        state_ = State::Connecting;
+        serial_.open(portname_);
+        serial_.set_option(asio::serial_port_base::baud_rate(baudrate_));
+
+        state_ = State::Connected;
+        reconnect_attempt_ = 0;
+
+        DoRead();
+        if (config_.enable_heartbeat) SendHeartbeat();
+
+        error_code ec;
+        if (handler_interface_) handler_interface_->OnConnect(ec);
+        if (handler_function_.onconnectfun) handler_function_.onconnectfun(ec);
+
+        cout << "[Serial] Async Connected\n";
+    }
+    catch (...)
+    {
+        cout << "[Serial] Async Connect Failed\n";
+        HandleReconnect();
+    }
+}
+
+void CSerialPortImpl::HandleReconnect()
+{
+    if (!config_.enable_auto_reconnect) return;
+
+    if (config_.max_reconnect_attempts != -1 &&
+        reconnect_attempt_ >= config_.max_reconnect_attempts)
+    {
+        cout << "[Serial] Max reconnect attempts reached\n";
+        state_ = State::Disconnected;
+        error_code ec = make_error_code(errc::connection_refused);
+        if (handler_interface_) handler_interface_->OnDisconnect(ec);
+        if (handler_function_.ondisconnectfun) handler_function_.ondisconnectfun(ec);
+        return;
+    }
+
+    reconnect_attempt_++;
+    cout << "[Serial] Reconnecting in " << config_.reconnect_interval_ms
+        << " ms, Attempt " << reconnect_attempt_ << "\n";
+
+    auto timer = make_shared<asio::steady_timer>(io_);
+    timer->expires_after(chrono::milliseconds(config_.reconnect_interval_ms));
+    timer->async_wait(asio::bind_executor(strand_, [this, timer](error_code) {
+        DoConnect();
+        }));
+}
+
+int CSerialPortImpl::Disconnect()
+{
+    State expected = state_.load();
+    if (expected == State::Disconnected || expected == State::Closing)
+        return 0;  // 已经断开或正在关闭
+
+    state_ = State::Closing;
+
+    // 停止心跳
+    StopHeartbeat();
+
+    // 关闭串口
+    asio::post(strand_, [this]() {
+        asio::error_code ec;
+        serial_.close(ec);
+        if (ec)
+            cout << "[Serial] Error closing serial: " << ec.message() << endl;
+        });
+
+    // 停止 io_context
+    io_.stop();
+
+    if (io_thread_ && io_thread_->joinable())
+        io_thread_->join();
+
+    state_ = State::Disconnected;
+
+    cout << "[Serial] Disconnected\n";
+
+    if (handler_interface_) {
+        std::error_code ec; // 可以填具体错误码
+        handler_interface_->OnDisconnect(ec);
+    }
+    if (handler_function_.ondisconnectfun) {
+        std::error_code ec; // 可以填具体错误码
+        handler_function_.ondisconnectfun(ec);
+    }
+
+    return 0; // 返回成功
+}
+
 void CSerialPortImpl::DoRead()
 {
-    serial_.async_read_some(
-        asio::buffer(recv_cache_, 1024),
-        asio::bind_executor(strand_, [this](std::error_code ec, std::size_t len)
+    serial_.async_read_some(asio::buffer(read_buffer_),
+        asio::bind_executor(strand_,
+            [this](error_code ec, size_t len)
             {
                 if (ec)
                 {
-                    SerialLogger::Info("Read Error");
                     HandleReconnect();
                     return;
                 }
 
-                ringbuf_.push(recv_cache_.data(), len);
-                ProcessRawData();
+                ProcessRawData(read_buffer_.data(), len);
                 DoRead();
-            })
-    );
+            }));
 }
 
-void CSerialPortImpl::ProcessRawData()
+void CSerialPortImpl::ProcessRawData(const char* data, size_t len)
 {
-    std::vector<char> frame;
-    while (ringbuf_.size() > 0)
+    recv_cache_.insert(recv_cache_.end(), data, data + len);
+
+    while (config_.enable_frame && recv_cache_.size() >= 2)
     {
-        std::vector<char> tmp;
-        ringbuf_.pop(tmp, ringbuf_.size());
-        if (SerialFrame::Parse(tmp, frame, { config_.enable_frame, config_.frame_header, config_.frame_tail }))
+        if (recv_cache_[0] != config_.frame_header)
         {
-            if (config_.enable_crc)
-            {
-                // CRC 校验略，可调用 CRC16::Calc()
-            }
-            if (handler_) handler_->OnRead(frame, {});
+            recv_cache_.erase(recv_cache_.begin());
+            continue;
         }
+
+        auto tail_it = find(recv_cache_.begin(), recv_cache_.end(), config_.frame_tail);
+        if (tail_it == recv_cache_.end()) break;
+
+        vector<char> frame(recv_cache_.begin(), tail_it + 1);
+        recv_cache_.erase(recv_cache_.begin(), tail_it + 1);
+
+        HandleFrame(frame);
+    }
+
+    if (!config_.enable_frame && !recv_cache_.empty())
+    {
+        vector<char> frame = recv_cache_;
+        recv_cache_.clear();
+        HandleFrame(frame);
     }
 }
 
-int CSerialPortImpl::Write(const std::vector<char>& data)
+void CSerialPortImpl::HandleFrame(const vector<char>& frame)
+{
+    if (config_.enable_crc && frame.size() >= 3)
+    {
+        uint16_t recv_crc = *(uint16_t*)&frame[frame.size() - 2];
+        uint16_t calc_crc = CRC16((uint8_t*)frame.data(), frame.size() - 2);
+        if (recv_crc != calc_crc)
+        {
+            cout << "[Serial] CRC Error\n";
+            return;
+        }
+    }
+
+    error_code ec;
+    if (handler_interface_) handler_interface_->OnRead(frame, ec);
+    if (handler_function_.onreadfun) handler_function_.onreadfun(frame, ec);
+}
+
+int CSerialPortImpl::Write(const vector<char>& data)
 {
     asio::post(strand_, [this, data]()
         {
+            lock_guard<mutex> lock(write_mutex_);
             write_queue_.push_back(data);
             if (write_queue_.size() == 1) DoWrite();
         });
     return 0;
 }
 
-void CSerialPortImpl::DoWrite()
+int CSerialPortImpl::Write(const vector<char>& data, vector<char>& response_data, int timeout_ms)
 {
-    if (write_queue_.empty()) return;
+    response_data.clear();
 
-    auto& data = write_queue_.front();
-    asio::async_write(serial_, asio::buffer(data),
-        asio::bind_executor(strand_, [this](std::error_code ec, size_t len)
+    if (!IsConnected()) return -1;
+
+    auto req = make_shared<PendingRequest>();
+    req->timer = make_shared<asio::steady_timer>(io_);
+    asio::post(strand_, [this, req]() { pending_requests_[0] = req; });
+
+    Write(data);
+
+    req->timer->expires_after(chrono::milliseconds(timeout_ms));
+    req->timer->async_wait(asio::bind_executor(strand_, [this, req](error_code ec) {
+        if (!ec)
+        {
+            if (pending_requests_.count(0))
             {
-                if (ec)
-                {
-                    SerialLogger::Info("Write Error");
-                    HandleReconnect();
-                }
-                else
-                {
-                    if (handler_) handler_->OnWrite(write_queue_.front(), {});
-                    write_queue_.pop_front();
-                    if (!write_queue_.empty()) DoWrite();
-                }
-            })
-    );
-}
+                pending_requests_.erase(0);
+            }
+        }
+        }));
 
-bool CSerialPortImpl::IsConnected() const { return connected_; }
-int CSerialPortImpl::Disconnect()
-{
-    running_ = false;
-    std::error_code ec;
-    serial_.close(ec);
-    io_.stop();
-    if (io_thread_ && io_thread_->joinable()) io_thread_->join();
-    connected_ = false;
-    if (handler_) handler_->OnDisconnect({});
+    future<vector<char>> fut = req->promise.get_future();
+    vector<char> result = fut.get();
+
+    response_data = result;
     return 0;
 }
 
-void CSerialPortImpl::HandleReconnect()
-{
-    connected_ = false;
-    if (handler_) handler_->OnDisconnect({});
-    asio::steady_timer t(io_, std::chrono::milliseconds(config_.reconnect_interval_ms));
-    t.async_wait([this](std::error_code) {
-        if (running_) Connect(portname_, baudrate_);
-        });
-}
-
-int CSerialPortImpl::AsyncConnect(const std::string& portname, int baudrate)
-{
-    asio::post(strand_, [this, portname, baudrate]() {
-        Connect(portname, baudrate);
-        });
-    return 0;
-}
-
-int CSerialPortImpl::AsyncWrite(const std::vector<char>& data)
+int CSerialPortImpl::AsyncWrite(const vector<char>& data)
 {
     return Write(data);
 }
 
-int CSerialPortImpl::Write(const std::vector<char>& data, std::vector<char>& response_data, int timeout_ms)
+void CSerialPortImpl::DoWrite()
 {
-    std::promise<std::vector<char>> p;
-    auto f = p.get_future();
+    if (write_queue_.empty()) return;
 
-    Write(data);
+    asio::async_write(serial_, asio::buffer(write_queue_.front()),
+        asio::bind_executor(strand_, [this](error_code ec, size_t len) {
+            lock_guard<mutex> lock(write_mutex_);
+            if (ec) { HandleReconnect(); return; }
 
-    if (f.wait_for(std::chrono::milliseconds(timeout_ms)) == std::future_status::ready)
+            write_queue_.pop_front();
+            if (!write_queue_.empty()) DoWrite();
+            }));
+}
+
+uint16_t CSerialPortImpl::CRC16(const uint8_t* data, size_t len)
+{
+    uint16_t crc = 0xFFFF;
+    for (size_t i = 0; i < len; i++)
     {
-        response_data = f.get();
-        return 0;
+        crc ^= data[i];
+        for (int j = 0; j < 8; j++)
+            crc = (crc & 1) ? (crc >> 1) ^ 0xA001 : crc >> 1;
     }
-    else
-    {
-        return -1; // timeout
-    }
+    return crc;
+}
+
+void CSerialPortImpl::SendHeartbeat()
+{
+    if (!config_.enable_heartbeat) return;
+
+    if (!heartbeat_timer_) heartbeat_timer_ = make_shared<asio::steady_timer>(io_);
+    heartbeat_timer_->expires_after(chrono::milliseconds(config_.heartbeat_interval_ms));
+    heartbeat_timer_->async_wait(asio::bind_executor(strand_, [this](error_code ec) {
+        if (!ec && state_ == State::Connected)
+        {
+            char hb[3] = { config_.frame_header, 0x00, config_.frame_tail };
+            Write(vector<char>(hb, hb + 3));
+            SendHeartbeat();
+        }
+        }));
+}
+
+void CSerialPortImpl::StopHeartbeat()
+{
+    if (heartbeat_timer_) heartbeat_timer_->cancel();
 }
 
 
