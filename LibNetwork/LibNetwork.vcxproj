@@ -185,7 +185,8 @@
     <ClInclude Include="SerialLogger.h" />
     <ClInclude Include="serialport.h" />
     <ClInclude Include="serialportimpl.h" />
-    <ClInclude Include="serialportimplk.h" />
+    <ClInclude Include="serialportk.h" />
+    <ClInclude Include="serialportkimpl.h" />
     <ClInclude Include="SerialTypes.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />
@@ -203,7 +204,7 @@
     <ClCompile Include="SerialFrame.cpp" />
     <ClCompile Include="SerialLogger.cpp" />
     <ClCompile Include="serialportimpl.cpp" />
-    <ClCompile Include="serialportimplk.cpp" />
+    <ClCompile Include="serialportkimpl.cpp" />
     <ClCompile Include="tcpclientimpl.cpp" />
     <ClCompile Include="tcpclientsocket.cpp" />
     <ClCompile Include="tcpserveraccept.cpp" />

@@ -54,9 +54,6 @@
     <ClInclude Include="serialportimpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="serialportimplk.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CRC16.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -76,6 +73,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SerialTypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="serialportk.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="serialportkimpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,9 +101,6 @@
     <ClCompile Include="serialportimpl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="serialportimplk.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="RingBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -108,6 +108,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SerialLogger.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="serialportkimpl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
