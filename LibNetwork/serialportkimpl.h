@@ -13,7 +13,7 @@
 #include <asio.hpp>
 #include "kutility.h"
 #include "kcommon.h"
-#include "serialport.h"
+#include "serialportk.h"
 using namespace std;
 using namespace asio;
 

@@ -5,7 +5,7 @@
  * \date   2024.08.29
  *********************************************************************/
 
-#include "serialportimplk.h"
+#include "serialportkimpl.h"
 
 
 
