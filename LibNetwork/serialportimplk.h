@@ -1,5 +1,5 @@
 /*********************************************************************
- * \file   SerialPortImpl.h
+ * \file   SerialPortImplk.h
  * \brief  串口类.
  * \author 蒋珂
  * \date   2024.08.29
@@ -18,7 +18,7 @@ using namespace std;
 using namespace asio;
 
 
-class CSerialPortImpl : public ISerialPort
+class CSerialPortImplk : public ISerialPortk
 {
 
 public:
@@ -47,7 +47,7 @@ public:
     }
 
 public:
-    CSerialPortImpl()
+    CSerialPortImplk()
     {
 
         m_serial = new asio::serial_port( m_ios );
@@ -56,7 +56,7 @@ public:
         //     open( port_name);
         // }
     }
-    virtual ~CSerialPortImpl()
+    virtual ~CSerialPortImplk()
     {
         close();
         if( m_serial )
@@ -243,7 +243,7 @@ private:
     //async Write some data to port
     void asyncWrite(const std::vector<std::byte>& bytes)
     {
-        m_serial->async_write_some(asio::buffer(static_cast<const void*>(bytes.data()), bytes.size()), std::bind(&CSerialPortImpl::writeCallback, this, std::placeholders::_1, std::placeholders::_2));
+        m_serial->async_write_some(asio::buffer(static_cast<const void*>(bytes.data()), bytes.size()), std::bind(&CSerialPortImplk::writeCallback, this, std::placeholders::_1, std::placeholders::_2));
     }
 
     //The asyanc callback function of asyanc_write
@@ -355,7 +355,7 @@ private:
     //Read data from port which write data just now
     void asyncRead()
     {        
-        m_serial->async_read_some(asio::buffer(m_read_buffer), std::bind( &CSerialPortImpl::readCallback, this, m_read_buffer, std::placeholders::_1, std::placeholders::_2) );
+        m_serial->async_read_some(asio::buffer(m_read_buffer), std::bind( &CSerialPortImplk::readCallback, this, m_read_buffer, std::placeholders::_1, std::placeholders::_2) );
     }
 
     //The asyanc callback function of asyanc_read

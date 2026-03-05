@@ -27,6 +27,7 @@ public:
     CSerialPortImpl();
     virtual ~CSerialPortImpl();
 
+    int RegisterHandler(ISerialPortHandlerFunction serialport_handler_fun) override;
     int RegisterHandler(ISerialPortHandler* handler) override;
 
     int Connect(const std::string& portname, int baudrate = 115200) override;
@@ -100,6 +101,7 @@ private:
     int baudrate_;
 
     ISerialPortHandler* handler_;
+    ISerialPortHandlerFunction handler_fun_;
 
     std::array<char, 4096> read_buffer_;
     std::vector<char> recv_cache_;

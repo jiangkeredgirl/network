@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "serialport.h"
-#include "serialporthandler.h"
+//#include "serialporthandler.h"
 
 
 class SerialPortHandlerCenter : public ISerialPortHandler

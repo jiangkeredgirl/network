@@ -38,6 +38,12 @@ bool CSerialPortImpl::IsConnected() const
     return state_ == State::Connected;
 }
 
+int CSerialPortImpl::RegisterHandler(ISerialPortHandlerFunction handler_fun)
+{
+    handler_fun_ = handler_fun;
+    return 0;
+}
+
 int CSerialPortImpl::RegisterHandler(ISerialPortHandler* handler)
 {
     handler_ = handler;
@@ -70,6 +76,10 @@ int CSerialPortImpl::Connect(const std::string& portname, int baudrate)
 
         if (handler_)
             handler_->OnSerialPortConnect(0, "Connected");
+        if (handler_fun_.onconnectfun)
+        {
+            handler_fun_.onconnectfun(0, "Connected");
+        }
 
         return 0;
     }
@@ -115,6 +125,10 @@ void CSerialPortImpl::DoConnect()
 
         if (handler_)
             handler_->OnSerialPortConnect(0, "Connected");
+        if (handler_fun_.onconnectfun)
+        {
+            handler_fun_.onconnectfun(0, "Connected");
+        }
     }
     catch (...)
     {
@@ -235,6 +249,10 @@ void CSerialPortImpl::HandleFrame(const vector<char>& frame)
         {
             if (handler_)
                 handler_->OnSerialPortError(-1, "CRC Error");
+            if (handler_fun_.onerrorfun)
+            {
+                handler_fun_.onerrorfun(-1, "CRC Error");
+            }
             return;
         }
     }
@@ -265,6 +283,10 @@ void CSerialPortImpl::HandleFrame(const vector<char>& frame)
     // 如果没有未超时请求，普通回调
     if (handler_)
         handler_->OnSerialPortRead(frame.data(), frame.size(), 0, "OK");
+    if (handler_fun_.onreadfun)
+    {
+        handler_fun_.onreadfun(frame.data(), frame.size(), 0, "OK");
+    }
 }
 
 int CSerialPortImpl::Write(const char* data, size_t size)
@@ -469,6 +491,10 @@ int CSerialPortImpl::Disconnect()
 
     if (handler_)
         handler_->OnSerialPortDisconnect(0, "Disconnected");
+    if (handler_fun_.ondisconnectfun)
+    {
+        handler_fun_.ondisconnectfun(0, "Disconnected");
+    }
 
     return 0;
 }

@@ -54,7 +54,7 @@
     <ClInclude Include="serialportimpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="serialporthandler.h">
+    <ClInclude Include="serialportimplk.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -75,6 +75,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="serialportimpl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="serialportimplk.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

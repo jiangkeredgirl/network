@@ -178,8 +178,8 @@
   <ItemGroup>
     <ClInclude Include="NetDataPackage.h" />
     <ClInclude Include="serialport.h" />
-    <ClInclude Include="serialporthandler.h" />
     <ClInclude Include="serialportimpl.h" />
+    <ClInclude Include="serialportimplk.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />
     <ClInclude Include="tcpclientimpl.h" />
@@ -193,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="serialportimpl.cpp" />
+    <ClCompile Include="serialportimplk.cpp" />
     <ClCompile Include="tcpclientimpl.cpp" />
     <ClCompile Include="tcpclientsocket.cpp" />
     <ClCompile Include="tcpserveraccept.cpp" />
