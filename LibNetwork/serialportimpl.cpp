@@ -9,14 +9,14 @@
 
 LIBSERIALPORT_API ISerialPort* NewSerialPort(void)
 {
-    return new AsioSerialPortImpl();
+    return new serial::AsioSerialPortImpl();
 }
 
 LIBSERIALPORT_API void DeleteSerialPort(ISerialPort* serial_port)
 {
     if (serial_port)
     {
-        delete dynamic_cast<AsioSerialPortImpl*>(serial_port);
+        delete dynamic_cast<serial::AsioSerialPortImpl*>(serial_port);
         serial_port = nullptr;
     }
 }
