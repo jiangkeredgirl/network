@@ -6,6 +6,8 @@ using namespace std;
 
 #include "tcpclient.h"
 #include "tcpserver.h"
+#include "serialport.h"
+#include "serialportk.h"
 
 
 #define KNETWORK_USE_DYNAMIC_DLL    1
@@ -100,6 +102,59 @@ public:
 #endif
 	}
 
+	ISerialPort* NewSerialPort(void)
+	{
+		ISerialPort* client = nullptr;
+#if KNETWORK_USE_DYNAMIC_DLL
+		if (m_NewSerialPort)
+		{
+			client = m_NewSerialPort();
+		}
+#else
+		client = ::NewSerialPort();
+#endif
+		return client;
+	}
+
+	void DeleteSerialPort(ISerialPort* client)
+	{
+#if KNETWORK_USE_DYNAMIC_DLL
+		if (m_DeleteSerialPort)
+		{
+			m_DeleteSerialPort(client);
+		}
+#else
+		::DeleteSerialPort(client);
+#endif
+	}
+
+	ISerialPortk* NewSerialPortk(void)
+	{
+		ISerialPortk* client = nullptr;
+#if KNETWORK_USE_DYNAMIC_DLL
+		if (m_NewSerialPortk)
+		{
+			client = m_NewSerialPortk();
+		}
+#else
+		client = ::NewSerialPortk();
+#endif
+		return client;
+	}
+
+	void DeleteSerialPortk(ISerialPortk* client)
+	{
+#if KNETWORK_USE_DYNAMIC_DLL
+		if (m_DeleteSerialPortk)
+		{
+			m_DeleteSerialPortk(client);
+		}
+#else
+		::DeleteSerialPort(clientk);
+#endif
+	}
+
+
 
 private:
 	int LoadTcpDll()
@@ -150,6 +205,38 @@ private:
 				m_hDll = nullptr;
 				break;
 			}
+			m_NewSerialPort = (NewSerialPortFun)GetProcAddress(m_hDll, "NewSerialPort");
+			if (m_NewSerialPort == nullptr)
+			{
+				int error = GetLastError();
+				FreeLibrary(m_hDll);
+				m_hDll = nullptr;
+				break;
+			}
+			m_DeleteSerialPort = (DeleteSerialPortFun)GetProcAddress(m_hDll, "DeleteSerialPort");
+			if (m_DeleteSerialPort == nullptr)
+			{
+				int error = GetLastError();
+				FreeLibrary(m_hDll);
+				m_hDll = nullptr;
+				break;
+			}
+			m_NewSerialPortk = (NewSerialPortkFun)GetProcAddress(m_hDll, "NewSerialPortk");
+			if (m_NewSerialPortk == nullptr)
+			{
+				int error = GetLastError();
+				FreeLibrary(m_hDll);
+				m_hDll = nullptr;
+				break;
+			}
+			m_DeleteSerialPortk = (DeleteSerialPortkFun)GetProcAddress(m_hDll, "DeleteSerialPortk");
+			if (m_DeleteSerialPortk == nullptr)
+			{
+				int error = GetLastError();
+				FreeLibrary(m_hDll);
+				m_hDll = nullptr;
+				break;
+			}
 			errorCode = 1;
 		} while (0);
 		return errorCode;
@@ -173,4 +260,8 @@ public:
 	DeleteTcpServerFun m_DeleteTcpServer = nullptr;
 	NewTcpClientFun m_NewTcpClient = nullptr;
 	DeleteTcpClientFun m_DeleteTcpClient = nullptr;
+	NewSerialPortFun m_NewSerialPort = nullptr;
+	DeleteSerialPortFun m_DeleteSerialPort = nullptr;
+	NewSerialPortkFun m_NewSerialPortk = nullptr;	
+	DeleteSerialPortkFun m_DeleteSerialPortk = nullptr;
 };
