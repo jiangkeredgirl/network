@@ -208,37 +208,54 @@ int CSerialPortImpl::Write(const vector<char>& data,
     req->request = data;
 
     req->timeout_ms = timeout_ms;
+    
+    int try_counting = 0;
 
-    auto future = req->promise.get_future();
+	do
+	{
+		auto future = req->promise.get_future();
 
+		{
+			std::lock_guard<std::mutex> lock(write_mutex_);
+
+			request_queue_.push_back(req);
+		}
+
+		asio::post(io_,
+			[this, req]()
+			{
+				asio::async_write(port_,
+
+					asio::buffer(req->request),
+
+					[this, req](const std::error_code& ec, size_t)
+					{
+						if (ec)
+						{
+							req->promise.set_value(-1);
+                            SerialLogger::log(spdlog::level::err, "Async write failed: {}", ec.message());
+							return;
+						}
+					});
+			});
+
+		if (future.wait_for(std::chrono::milliseconds(timeout_ms)) ==
+			std::future_status::timeout)
+		{
+            req = request_queue_.back();
+            request_queue_.pop_back();
+            req->promise = std::promise<int>();  // 新的 promise
+            SerialLogger::log(spdlog::level::err, "Skipped expired request");
+			//return -1;
+            continue;
+		}
+        break;
+
+	} while (try_counting++ < config_.request_retry);
+
+    if (try_counting > config_.request_retry)
     {
-        std::lock_guard<std::mutex> lock(write_mutex_);
-
-        request_queue_.push_back(req);
-    }
-
-    asio::post(io_,
-        [this, req]()
-        {
-            asio::async_write(port_,
-
-                asio::buffer(req->request),
-
-                [this, req](const std::error_code& ec, size_t)
-                {
-                    if (ec)
-                    {
-                        req->promise.set_value(-1);
-                        return;
-                    }
-                });
-        });
-
-    if (future.wait_for(std::chrono::milliseconds(timeout_ms)) ==
-        std::future_status::timeout)
-    {
-        request_queue_.pop_back();
-        return -1;
+        SerialLogger::log(spdlog::level::err, "stry {} times, expired request", config_.request_retry);
     }
 
     response = req->response;

@@ -8,6 +8,7 @@
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 class SerialLogger
 {
@@ -60,7 +61,7 @@ private:
      * @brief 创建一个带日志的 logger（静态）
     */
 	static std::shared_ptr<spdlog::logger> create_logger(const std::string& name = "serial") {
-		return spdlog::stdout_logger_mt(name);
+		return spdlog::/*stdout_logger_mt*/stdout_color_mt(name);
 	}
 
 public:
