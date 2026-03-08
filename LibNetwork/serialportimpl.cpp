@@ -237,6 +237,7 @@ int CSerialPortImpl::Write(const vector<char>& data,
     if (future.wait_for(std::chrono::milliseconds(timeout_ms)) ==
         std::future_status::timeout)
     {
+        request_queue_.pop_back();
         return -1;
     }
 
