@@ -164,6 +164,7 @@
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/D_HAS_STD_BYTE=1  /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -187,6 +188,7 @@
     <ClInclude Include="serialportimpl.h" />
     <ClInclude Include="serialportk.h" />
     <ClInclude Include="serialportkimpl.h" />
+    <ClInclude Include="SerialRequest.h" />
     <ClInclude Include="SerialTypes.h" />
     <ClInclude Include="tcpclient.h" />
     <ClInclude Include="tcpclienthandler.h" />

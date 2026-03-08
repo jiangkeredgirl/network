@@ -1,2 +1,2 @@
 #include "SerialLogger.h"
-std::mutex SerialLogger::mtx_;
+std::shared_ptr<spdlog::logger> SerialLogger::logger_ = spdlog::get("serial");
