@@ -242,12 +242,16 @@ int CSerialPortImpl::Write(const vector<char>& data,
 		if (future.wait_for(std::chrono::milliseconds(timeout_ms)) ==
 			std::future_status::timeout)
 		{
-            req = request_queue_.back();
-            request_queue_.pop_back();
-            req->promise = std::promise<int>();  // 新的 promise
-            SerialLogger::log(spdlog::level::err, "Skipped expired request");
+			req = request_queue_.back();
+			request_queue_.pop_back();
+			req->promise = std::promise<int>();  // 新的 promise
+			SerialLogger::log(spdlog::level::err, "Skipped expired request");
+			if (try_counting < config_.request_retry)
+			{
+				SerialLogger::log(spdlog::level::info, "try the {}th request", try_counting + 1);
+			}
 			//return -1;
-            continue;
+			continue;
 		}
         break;
 
@@ -255,7 +259,7 @@ int CSerialPortImpl::Write(const vector<char>& data,
 
     if (try_counting > config_.request_retry)
     {
-        SerialLogger::log(spdlog::level::err, "stry {} times, expired request", config_.request_retry);
+        SerialLogger::log(spdlog::level::err, "stry {} times, also expired request", config_.request_retry);
     }
 
     response = req->response;
