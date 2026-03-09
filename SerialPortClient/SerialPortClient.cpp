@@ -31,17 +31,7 @@ int main(int argc, char* argv[])
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 	cout << "输出中文测试" << endl;
-
-	cout << "please input client type, defualt sync, a indicate async" << endl;
-	string client_type;
-	getline(std::cin, client_type);
-	if (client_type == "a")
-	{
-		SerialPortCenter::instance().Run(true);
-	}
-	else
-	{
-		SerialPortCenter::instance().Run(false);
-	}
+	SerialPortCenter::instance().Run();
+	system("pause");
 	return 0;
 }

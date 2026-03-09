@@ -6,23 +6,16 @@
 #endif
 
 #include <string>
-#include <memory>
-#include <cstddef>
-#include <codecvt>
-#include <thread>
-#include <mutex>
-#include <atomic>
 #include <functional>
-#include <condition_variable>
 
 using namespace std;
 
+using any_type = std::string;  // 串口名类型，如 "COM3" 或 "/dev/ttyUSB0"
+// 回调函数类型定义
+using ReadBytesFunction   = std::function<void(const std::vector<std::byte>& readed_bytes)>;
+using ReadHexStrFunction  = std::function<void(const std::string& readed_hexs)>;
+using SerialErrorFunction = std::function<void(int errorcode, const std::string& errormsg)>;
 
-
-typedef string any_type;
-typedef std::function<void(const std::vector<std::byte>& bytes)>     ReadBytesFunction;
-typedef std::function<void(const std::string& hexstr)>               ReadHexStrFunction;
-typedef std::function<void(int error_code, std::string error_msg)>   SerialErrorFunction;
 
 class ISerialPortk
 {
@@ -32,6 +25,7 @@ public:
 	virtual int Disconnect() = 0;
 	virtual int WriteHexStr(const string& wirte_hexstr) = 0;
 	virtual int WriteHexStr(const string& wirte_hexstr, string& read_hexstr, int timeout_msec = 1000) = 0;
+	virtual ~ISerialPortk() = default;
 };
 
 

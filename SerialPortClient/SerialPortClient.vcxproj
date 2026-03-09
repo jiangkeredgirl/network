@@ -74,7 +74,7 @@
     <OutDir>$(ProjectDir)bin\</OutDir>
     <IntDir>$(ProjectDir)bin\tempout\x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_x$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>..\..\kutility\;.\NetworkSDK\include\;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\kutility\;.\NetworkSDK\include\;.\KlogSDK\include\;$(IncludePath)</IncludePath>
     <LibraryPath>.\NetworkSDK\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -82,7 +82,7 @@
     <IntDir>$(ProjectDir)bin\tempout\x$(PlatformArchitecture)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_x$(PlatformArchitecture)_$(Configuration)</TargetName>
     <LibraryPath>.\NetworkSDK\lib\;$(LibraryPath)</LibraryPath>
-    <IncludePath>..\..\kutility\;.\NetworkSDK\include\;$(IncludePath)</IncludePath>
+    <IncludePath>..\..\kutility\;.\NetworkSDK\include\;.\KlogSDK\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
