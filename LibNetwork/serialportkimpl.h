@@ -97,6 +97,7 @@ public:
                                                             //asyncRead();
                                                             std::vector<std::byte> bytes;
                                                             read(bytes);
+                                                            m_is_read_wait = false;
                                                             m_read_wait_condition.notify_all();
                                                             std::this_thread::sleep_for(std::chrono::milliseconds(10));
                                                         }
@@ -271,10 +272,10 @@ private:
         int try_count = 3;
         do
         {
-            std::cv_status status;
+            /*std::cv_status*/ bool status;
             unique_lock<mutex> lock(m_read_wait_mutex);
-            status = m_read_wait_condition.wait_for(lock, std::chrono::milliseconds(timeoutMsec));
-            if (status == std::cv_status::no_timeout)
+            status = m_read_wait_condition.wait_for(lock, std::chrono::milliseconds(timeoutMsec), [&] { return !m_is_read_wait; });
+            if (status/* == std::cv_status::no_timeout*/)
             {
                 std::cout << "waitRread completed" << std::endl;
                 if(m_readed_bytes.empty())
@@ -290,7 +291,7 @@ private:
                     break;
                 }
             }
-            else if (status == std::cv_status::timeout)
+            else/* if (status == std::cv_status::timeout)*/
             {
                 std::cerr << "waitRread timeout" << std::endl;
                 error_code = 1;
