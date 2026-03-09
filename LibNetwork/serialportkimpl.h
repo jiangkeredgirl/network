@@ -20,9 +20,10 @@
 #include <vector>
 #include <functional>
 #include <chrono>
+#include "../kcommonhpp/kcommon.h"
 
 
-
+#if 0
 // 工具函数：十六进制字符串转字节数组（补充实现）
 inline std::vector<std::byte> HexStringToBytes(const std::string& hex_str)
 {
@@ -58,6 +59,9 @@ inline std::string BytesToString(const std::vector<std::byte>& bytes)
     }
     return str;
 }
+#endif
+
+
 
 class CSerialPortImplk : public ISerialPortk
 {
@@ -125,7 +129,8 @@ public:
             // 关闭已打开的串口
             if (m_serial->is_open())
             {
-                m_serial->close(m_ec);
+                //m_serial->close(m_ec);
+                close();
             }
 
             // 打开串口
@@ -165,6 +170,7 @@ public:
         return error_code;
     }
 
+#if 0
     // 关闭串口
     int close()
     {
@@ -193,6 +199,51 @@ public:
         }
 
         // 停止 IO 上下文
+        m_ios.stop();
+        if (m_io_thread.joinable())
+        {
+            m_io_thread.join();
+        }
+
+        std::cout << "Serial port closed successfully." << std::endl;
+        return 0;
+    }
+#endif
+    // 关闭串口
+    int close()
+    {
+        // 1. 先标记读取线程取消
+        m_read_cancel = true;
+
+        // 2. 主动取消串口的阻塞读取/写入操作（关键：中断read_some）
+        if (m_serial && m_serial->is_open())
+        {
+            asio::error_code ec;
+            m_serial->cancel(ec); // 取消所有异步/同步IO操作，中断read_some阻塞
+            if (ec)
+            {
+                std::cerr << "Cancel serial port failed: " << ec.message() << std::endl;
+            }
+        }
+
+        // 3. 等待读取线程退出（此时read_some已被中断，线程能检测到m_read_cancel）
+        if (m_read_thread.joinable())
+        {
+            m_read_thread.join();
+        }
+
+        // 4. 关闭串口
+        if (m_serial && m_serial->is_open())
+        {
+            asio::error_code ec;
+            m_serial->close(ec);
+            if (ec)
+            {
+                std::cerr << "Close serial port failed: " << ec.message() << std::endl;
+            }
+        }
+
+        // 5. 停止IO上下文并等待线程退出
         m_ios.stop();
         if (m_io_thread.joinable())
         {
@@ -318,6 +369,16 @@ private:
                         std::cout << "请求应答数据已返回" << std::endl;
 						m_is_read_wait = false;
                         m_responsed_bytes = m_readed_bytes;
+                        // 处理读取到的数据
+                        std::stringstream read_ss;
+                        read_ss << "**********serial response readed " << m_responsed_bytes.size() << " bytes: ";
+                        for (size_t i = 0; i < m_responsed_bytes.size(); ++i)
+                        {
+                            read_ss << std::hex << std::setw(2) << std::setfill('0')
+                                << static_cast<int>(char(m_responsed_bytes[i]) & 0xFF) << " ";
+                            bytes.push_back(static_cast<std::byte>(m_responsed_bytes[i]));
+                        }
+                        std::cout << read_ss.str() << std::endl;
 						m_read_wait_condition.notify_all();
 					}
                     // 避免过度占用 CPU
