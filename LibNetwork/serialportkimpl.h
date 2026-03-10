@@ -557,6 +557,12 @@ private:
                         m_error_callback(m_ec.value(), m_ec.message());
                     }
                 }
+                else if (m_ec == asio::error::operation_aborted)
+                {
+                    // 忽略“操作被取消”的错误（关闭串口时主动触发的cancel）
+                    std::cout << "Read operation canceled (normal close)" << std::endl;
+                    error_code = 0;
+                }
                 return error_code;
             }
 
