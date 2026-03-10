@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -68,7 +69,7 @@ public:
     template<typename... Args>
     static void log(int level, const std::string& fmt, Args&&... args) {
         if (logger_) {
-            logger_->log(static_cast<spdlog::level::level_enum>(level), fmt, std::forward<Args>(args)...);
+            logger_->log(static_cast<spdlog::level::level_enum>(level), fmt::runtime(fmt), std::forward<Args>(args)...);
         }
     }
 };

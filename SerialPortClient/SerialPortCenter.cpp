@@ -87,6 +87,11 @@ int SerialPortCenter::TestSeriolport()
 		}
 		else
 		{
+			serialport_client->Disconnect();
+			serialport_client->Connect(com_num, baud_rate);
+			serialport_client->Disconnect();			
+			serialport_client->Connect(com_num, baud_rate);		
+			serialport_client->Disconnect();
 			error_code = serialport_client->Connect(com_num, baud_rate);
 			if (error_code == 0)
 			{
@@ -173,6 +178,14 @@ int SerialPortCenter::TestSeriolportk()
 		serialport_client->RegisterHandler(nullptr
 			, std::bind(&SerialPortCenter::onReadk, this, std::placeholders::_1)
 			, std::bind(&SerialPortCenter::onErrork, this, std::placeholders::_1, std::placeholders::_2));
+
+		serialport_client->Disconnect();	
+		serialport_client->Connect(com_num);	
+		serialport_client->Connect(com_num);
+		string data("333333");
+		serialport_client->WriteHexStr(data);	
+		serialport_client->Disconnect();	
+		serialport_client->Disconnect();		
 		error_code = serialport_client->Connect(com_num);
 		if (error_code == 0)
 		{
