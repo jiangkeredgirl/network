@@ -51,7 +51,7 @@ int CTcpServerSocket::AsyncWrite(const char* data, size_t size)
 				{
 					if (m_write_callback && !write_buffer->empty())
 					{
-						TraceTempCout << "tcp client writed payload data size=" << bytes_transferred;
+						KlogTempCout << "tcp client writed payload data size=" << bytes_transferred;
 						m_write_callback(shared_from_this(), write_buffer->data(), write_buffer->size(), ec.value());
 					}
 				}
@@ -72,7 +72,7 @@ int CTcpServerSocket::RemotePort()
 
 void CTcpServerSocket::StartRead()
 {
-	TraceInfoCout << "tcp server accept a connet and start sync read data, client ip:" << m_socket.remote_endpoint().address().to_string();
+	KlogInfoCout << "tcp server accept a connet and start sync read data, client ip:" << m_socket.remote_endpoint().address().to_string();
 	if (m_connect_callback)
 	{
 		m_connect_callback(shared_from_this(), 0);
@@ -85,7 +85,7 @@ void CTcpServerSocket::StartRead()
 
 void CTcpServerSocket::AsyncStartRead()
 {
-	TraceInfoCout << "tcp server accept a connet and start async read data, client ip:" << m_socket.remote_endpoint().address().to_string();
+	KlogInfoCout << "tcp server accept a connet and start async read data, client ip:" << m_socket.remote_endpoint().address().to_string();
 	if (m_connect_callback)
 	{
 		m_connect_callback(shared_from_this(), 0);
@@ -95,11 +95,11 @@ void CTcpServerSocket::AsyncStartRead()
 
 void CTcpServerSocket::Disconnect()
 {
-	TraceInfoCout << "tcp server will disconnect a connect" << endl;
+	KlogInfoCout << "tcp server will disconnect a connect" << endl;
 	asio::error_code ec;
 	if (m_socket.is_open())
 	{
-		TraceInfoCout << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
+		KlogInfoCout << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string() << endl;
 		//m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 		m_socket.close(ec); // excute this statement occure crash
 	}
@@ -124,7 +124,7 @@ void CTcpServerSocket::Read()
 		std::string read_data(read_buffer->data(), bytes_transferred);
 		//std::cout << "Received: " << read_data << std::endl;
 		//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
-		(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
+		(KlogTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 		m_read_callback(shared_from_this(), read_data.c_str(), read_data.size(), ec.value());
 	}
 }
@@ -150,7 +150,7 @@ void CTcpServerSocket::AsyncRead()
 					std::string read_data(read_buffer->data(), bytes_transferred);
 					//std::cout << "Received: " << read_data << std::endl;
 					//(std::cout << "Received: ").write(read_data.c_str(), read_data.size());
-					(TraceTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
+					(KlogTempCout << "tcp client readed payload data size=" << bytes_transferred << ", payload data:").write(read_data.c_str(), read_data.size());
 					m_read_callback(shared_from_this(), read_data.c_str(), read_data.size(), ec.value());
 				}
 				AsyncRead();
@@ -165,17 +165,17 @@ int CTcpServerSocket::ReadErrorCheck(asio::error_code ec, size_t readed_size, si
 	{
 		if (ec == asio::error::eof)
 		{
-			TraceErrorCout << "tcp server read eof";
+			KlogErrorCout << "tcp server read eof";
 			break;
 		}
 		if (ec)
 		{
-			TraceErrorCout << "tcp server read error, error code:" << ec.value() << ", error message:" << ec.message();
+			KlogErrorCout << "tcp server read error, error code:" << ec.value() << ", error message:" << ec.message();
 			break;
 		}
 		if (readed_size != require_read_size)
 		{
-			TraceErrorCout << "tcp server read error, readed_size != require_read_size, readed_size=" << readed_size << ", require_read_size=" << require_read_size;
+			KlogErrorCout << "tcp server read error, readed_size != require_read_size, readed_size=" << readed_size << ", require_read_size=" << require_read_size;
 			break;
 		}
 		error_code = 0;
@@ -194,12 +194,12 @@ int CTcpServerSocket::WriteErrorCheck(asio::error_code ec, size_t writed_size, s
 	{
 		if (ec)
 		{
-			TraceErrorCout << "tcp server write error, error code:" << ec.value() << ", error message:" << ec.message();
+			KlogErrorCout << "tcp server write error, error code:" << ec.value() << ", error message:" << ec.message();
 			break;
 		}
 		if (writed_size != require_write_size)
 		{
-			TraceErrorCout << "tcp server write error, writed_size != require_write_size, writed_size=" << writed_size << ", require_write_size=" << require_write_size;
+			KlogErrorCout << "tcp server write error, writed_size != require_write_size, writed_size=" << writed_size << ", require_write_size=" << require_write_size;
 			break;
 		}
 		error_code = 0;
@@ -214,11 +214,11 @@ int CTcpServerSocket::WriteErrorCheck(asio::error_code ec, size_t writed_size, s
 int CTcpServerSocket::ProcessSocketError(int error_code)
 {
 	std::thread th = std::thread([this, error_code]() {
-		TraceInfoCout << "socket occur error, will close socket" << endl;
+		KlogInfoCout << "socket occur error, will close socket" << endl;
 		asio::error_code ec;
 		if (m_socket.is_open())
 		{
-			TraceInfoCout << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string();
+			KlogInfoCout << "tcp server close a connect, client ip:" << m_socket.remote_endpoint().address().to_string();
 			//m_socket.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
 			m_socket.close(ec); // excute this statement occure crash
 		}
